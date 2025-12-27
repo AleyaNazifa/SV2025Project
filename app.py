@@ -1,3 +1,8 @@
+"""
+Main entry point for UMK Sleep Study Dashboard
+This is the home page that users see first
+"""
+
 import streamlit as st
 from data_loader import (
     load_from_url,
@@ -17,133 +22,8 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Apply to ALL pages via session state
-if 'styles_loaded' not in st.session_state:
-    st.session_state.styles_loaded = True
-
-# Modern Professional Styling
-st.markdown("""
-<style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-    
-    * {
-        font-family: 'Inter', sans-serif;
-    }
-    
-    .stApp {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    }
-    
-    .main .block-container {
-        background-color: #ffffff;
-        border-radius: 20px;
-        padding: 3rem 2rem;
-        margin-top: 2rem;
-        box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-    }
-    
-    section[data-testid="stSidebar"] {
-        background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
-    }
-    
-    section[data-testid="stSidebar"] * {
-        color: #e2e8f0 !important;
-    }
-    
-    section[data-testid="stSidebar"] h1, 
-    section[data-testid="stSidebar"] h2, 
-    section[data-testid="stSidebar"] h3 {
-        color: #ffffff !important;
-    }
-    
-    section[data-testid="stSidebar"] .stButton > button {
-        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-        color: white;
-        border: none;
-        border-radius: 10px;
-        padding: 0.75rem 1.5rem;
-        font-weight: 600;
-        width: 100%;
-        transition: all 0.3s;
-    }
-    
-    section[data-testid="stSidebar"] .stButton > button:hover {
-        background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
-        transform: translateY(-2px);
-        box-shadow: 0 5px 15px rgba(59, 130, 246, 0.4);
-    }
-    
-    [data-testid="stMetric"] {
-        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-        padding: 1.5rem;
-        border-radius: 15px;
-        border: 2px solid #e2e8f0;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-    }
-    
-    [data-testid="stMetricValue"] {
-        font-size: 2.5rem !important;
-        font-weight: 700 !important;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-    }
-    
-    h1 {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        font-weight: 800 !important;
-    }
-    
-    .objective-card {
-        background: linear-gradient(135deg, #eef2ff 0%, #e0e7ff 100%);
-        border-left: 5px solid #667eea;
-        border-radius: 15px;
-        padding: 2rem;
-        margin: 2rem 0;
-        box-shadow: 0 4px 6px rgba(102, 126, 234, 0.1);
-    }
-    
-    .stat-box {
-        background: white;
-        border-radius: 15px;
-        padding: 2rem;
-        text-align: center;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-        border: 2px solid #f1f5f9;
-        transition: all 0.3s;
-    }
-    
-    .stat-box:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 15px 40px rgba(102, 126, 234, 0.2);
-        border-color: #667eea;
-    }
-    
-    .stat-icon {
-        font-size: 3rem;
-        margin-bottom: 1rem;
-    }
-    
-    .stat-value {
-        font-size: 2.5rem;
-        font-weight: 800;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-    }
-    
-    .stat-label {
-        color: #64748b;
-        font-weight: 600;
-        text-transform: uppercase;
-        font-size: 0.875rem;
-        letter-spacing: 0.05em;
-        margin-top: 0.5rem;
-    }
-</style>
-""", unsafe_allow_html=True)
+# Apply global styles
+apply_global_styles()
 
 # ===== SIDEBAR =====
 with st.sidebar:
@@ -329,12 +209,11 @@ with st.expander("🔍 View Dataset Preview"):
 st.markdown("---")
 
 # Navigation Info
-st.markdown("## 🧭 Navigation")
+st.markdown("## 🧭 Navigate to Other Pages")
 st.info("""
-**Ready to explore!** Use the sidebar to navigate between different analysis pages:
-- 🏠 **Home** - Overview and statistics (you are here)
-- 📊 **Visualizations** - Interactive charts and correlations
-- 👥 **Comparisons** - Demographic analysis
+**Use the sidebar to explore different sections:**
+- 📊 **Insomnia Visualisation** - Interactive charts and analysis
+- 👥 **Subgroup Comparison** - Compare across demographics
 """)
 
 st.success(f"✅ Dashboard ready • {len(df)} responses loaded • All features engineered")
