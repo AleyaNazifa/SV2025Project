@@ -94,16 +94,12 @@ st.markdown("**Comprehensive Analysis Dashboard • UMK Research Project**")
 st.markdown("---")
 
 # Objective Section
-st.markdown("""
-<div class="objective-card">
-    <h3 style="color: #5046e5; margin-top: 0;">🎯 Research Objective</h3>
-    <p style="color: #1e293b; font-size: 1.1rem; line-height: 1.8; margin-bottom: 0;">
-        To investigate the <strong>relationship between sleep quality and academic performance</strong> 
-        among UMK students, examining how insomnia severity, sleep patterns, and lifestyle factors 
-        correlate with educational outcomes and daily functioning.
-    </p>
-</div>
-""", unsafe_allow_html=True)
+st.markdown("## 🎯 Research Objective")
+st.info("""
+To investigate the **relationship between sleep quality and academic performance** 
+among UMK students, examining how insomnia severity, sleep patterns, and lifestyle factors 
+correlate with educational outcomes and daily functioning.
+""")
 
 # Key Statistics Cards
 st.markdown("## 📊 Key Insights at a Glance")
