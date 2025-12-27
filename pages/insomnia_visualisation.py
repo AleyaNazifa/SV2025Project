@@ -5,11 +5,14 @@ from data_loader import get_dataframe_from_session
 
 st.set_page_config(page_title="Visualizations", layout="wide", page_icon="📊")
 
-# Styling
+# Enhanced Modern Styling
 st.markdown("""
 <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-    * { font-family: 'Inter', sans-serif; }
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+    
+    * { 
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
+    }
     
     .stApp {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -23,36 +26,156 @@ st.markdown("""
         box-shadow: 0 20px 60px rgba(0,0,0,0.3);
     }
     
+    /* SIDEBAR STYLING */
     section[data-testid="stSidebar"] {
-        background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+        background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%) !important;
     }
     
-    section[data-testid="stSidebar"] * {
-        color: #e2e8f0 !important;
+    section[data-testid="stSidebar"] > div {
+        background-color: transparent !important;
+        padding-top: 1rem;
     }
     
+    /* Sidebar text colors */
+    section[data-testid="stSidebar"] h1,
+    section[data-testid="stSidebar"] h2,
+    section[data-testid="stSidebar"] h3,
+    section[data-testid="stSidebar"] label,
+    section[data-testid="stSidebar"] .stMarkdown,
+    section[data-testid="stSidebar"] p,
+    section[data-testid="stSidebar"] span {
+        color: #f1f5f9 !important;
+        font-weight: 500 !important;
+    }
+    
+    /* Filter section header */
+    section[data-testid="stSidebar"] h3 {
+        font-size: 1.1rem !important;
+        font-weight: 600 !important;
+        color: #ffffff !important;
+        margin-bottom: 1.5rem !important;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid #334155;
+    }
+    
+    /* Multiselect container */
+    section[data-testid="stSidebar"] .stMultiSelect {
+        background-color: #1e293b;
+        border-radius: 10px;
+        padding: 0.5rem;
+        margin-bottom: 1rem;
+        border: 1px solid #334155;
+    }
+    
+    /* Multiselect label */
+    section[data-testid="stSidebar"] .stMultiSelect label {
+        color: #cbd5e1 !important;
+        font-size: 0.875rem !important;
+        font-weight: 600 !important;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: 0.5rem !important;
+    }
+    
+    /* Multiselect input box */
+    section[data-testid="stSidebar"] .stMultiSelect > div > div {
+        background-color: #0f172a !important;
+        border: 1px solid #334155 !important;
+        border-radius: 8px !important;
+    }
+    
+    /* Multiselect dropdown */
+    section[data-testid="stSidebar"] .stMultiSelect [data-baseweb="select"] {
+        background-color: #0f172a !important;
+    }
+    
+    /* Selected items (pills) */
+    section[data-testid="stSidebar"] [data-baseweb="tag"] {
+        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important;
+        border: none !important;
+        border-radius: 6px !important;
+        padding: 0.25rem 0.75rem !important;
+        margin: 0.25rem !important;
+        font-size: 0.813rem !important;
+        font-weight: 500 !important;
+    }
+    
+    /* Remove button on pills */
+    section[data-testid="stSidebar"] [data-baseweb="tag"] button {
+        color: #ffffff !important;
+        opacity: 0.8;
+    }
+    
+    section[data-testid="stSidebar"] [data-baseweb="tag"] button:hover {
+        opacity: 1;
+    }
+    
+    /* Dropdown menu items */
+    [data-baseweb="menu"] {
+        background-color: #1e293b !important;
+        border: 1px solid #334155 !important;
+    }
+    
+    [role="option"] {
+        background-color: #1e293b !important;
+        color: #f1f5f9 !important;
+        font-weight: 500 !important;
+    }
+    
+    [role="option"]:hover {
+        background-color: #334155 !important;
+    }
+    
+    /* Info box in sidebar */
+    section[data-testid="stSidebar"] .stAlert {
+        background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%) !important;
+        border: none !important;
+        border-radius: 10px !important;
+        color: #dbeafe !important;
+        padding: 1rem !important;
+        font-size: 0.875rem !important;
+    }
+    
+    section[data-testid="stSidebar"] .stAlert p,
+    section[data-testid="stSidebar"] .stAlert strong {
+        color: #dbeafe !important;
+    }
+    
+    /* Main content styling */
     h1 {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         font-weight: 800 !important;
+        font-size: 2.5rem !important;
+        margin-bottom: 0.5rem !important;
     }
     
-    .viz-section {
-        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-        border-radius: 15px;
-        padding: 2rem;
-        margin: 2rem 0;
-        border: 2px solid #e2e8f0;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    h2 {
+        color: #1e293b !important;
+        font-weight: 700 !important;
+        font-size: 1.75rem !important;
+        margin-top: 2rem !important;
     }
     
     .insight-box {
-        background: linear-gradient(135deg, #eef2ff 0%, #e0e7ff 100%);
-        border-left: 4px solid #667eea;
+        background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+        border-left: 4px solid #3b82f6;
         border-radius: 10px;
-        padding: 1rem 1.5rem;
-        margin: 1rem 0;
+        padding: 1.25rem 1.5rem;
+        margin: 1.5rem 0;
+        box-shadow: 0 2px 4px rgba(59, 130, 246, 0.1);
+    }
+    
+    .insight-box strong {
+        color: #1e40af !important;
+        font-weight: 600;
+    }
+    
+    .insight-box p {
+        color: #1e293b !important;
+        line-height: 1.6;
+        margin: 0;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -67,23 +190,37 @@ if df is None:
     st.stop()
 
 # ===== SIDEBAR FILTERS =====
-st.sidebar.markdown("### 🎯 Filter Data")
+with st.sidebar:
+    st.markdown("### 🎯 Filter Data")
+    st.markdown("")
 
-def multiselect_filter(df, label, col):
+def multiselect_filter(df, label, col, icon=""):
     if col not in df.columns:
         return df
     options = sorted(df[col].dropna().unique().tolist())
-    selected = st.sidebar.multiselect(f"{label}", options, default=options)
+    selected = st.sidebar.multiselect(
+        f"{icon} {label}",
+        options,
+        default=options,
+        key=f"filter_{col}"
+    )
     return df[df[col].isin(selected)] if selected else df
 
 df_filtered = df.copy()
-df_filtered = multiselect_filter(df_filtered, "👤 Gender", "What is your gender?")
-df_filtered = multiselect_filter(df_filtered, "🎂 Age Group", "What is your age group?")
-df_filtered = multiselect_filter(df_filtered, "📚 Year of Study", "What is your year of study?")
-df_filtered = multiselect_filter(df_filtered, "🏛️ Faculty", "Which faculty are you currently enrolled in?")
+df_filtered = multiselect_filter(df_filtered, "Gender", "What is your gender?", "👤")
+df_filtered = multiselect_filter(df_filtered, "Age Group", "What is your age group?", "🎂")
+df_filtered = multiselect_filter(df_filtered, "Year of Study", "What is your year of study?", "📚")
+df_filtered = multiselect_filter(df_filtered, "Faculty", "Which faculty are you currently enrolled in?", "🏛️")
 
-st.sidebar.markdown("---")
-st.sidebar.info(f"📊 **Showing:** {len(df_filtered)} of {len(df)} responses\n\n**Filtered:** {len(df_filtered)/len(df)*100:.1f}%")
+with st.sidebar:
+    st.markdown("---")
+    st.info(f"""
+**📊 Data Summary**
+
+**Showing:** {len(df_filtered):,} responses  
+**Total:** {len(df):,} responses  
+**Filtered:** {len(df_filtered)/len(df)*100:.1f}%
+""")
 
 # ===== VIZ 1: Sleep Duration Distribution =====
 st.markdown("## 1️⃣ Sleep Duration Distribution")
@@ -110,12 +247,13 @@ if "SleepHours_est" in df_filtered.columns:
                     "field": "Category",
                     "type": "ordinal",
                     "title": "Sleep Duration",
-                    "axis": {"labelAngle": -45}
+                    "axis": {"labelAngle": -45, "labelFontSize": 12}
                 },
                 "y": {
                     "field": "Count",
                     "type": "quantitative",
-                    "title": "Number of Students"
+                    "title": "Number of Students",
+                    "axis": {"labelFontSize": 12}
                 },
                 "color": {
                     "field": "Count",
@@ -171,8 +309,18 @@ if need.issubset(df_filtered.columns):
                 {
                     "mark": {"type": "bar", "opacity": 0.7, "cornerRadiusTopLeft": 8, "cornerRadiusTopRight": 8},
                     "encoding": {
-                        "x": {"field": "Quality_Label", "type": "ordinal", "title": "Sleep Quality Rating"},
-                        "y": {"field": "Mean", "type": "quantitative", "title": "Insomnia Severity Index"},
+                        "x": {
+                            "field": "Quality_Label",
+                            "type": "ordinal",
+                            "title": "Sleep Quality Rating",
+                            "axis": {"labelFontSize": 12}
+                        },
+                        "y": {
+                            "field": "Mean",
+                            "type": "quantitative",
+                            "title": "Insomnia Severity Index",
+                            "axis": {"labelFontSize": 12}
+                        },
                         "color": {"value": "#667eea"},
                         "tooltip": [
                             {"field": "Quality_Label", "title": "Quality"},
@@ -222,45 +370,36 @@ if need.issubset(df_filtered.columns):
         y = scatter_df["AcademicImpact_index"].to_numpy()
         corr = np.corrcoef(x, y)[0, 1]
         
-        # Create regression line data
-        m, b = np.polyfit(x, y, 1)
-        line_df = pd.DataFrame({
-            "Insomnia": [x.min(), x.max()],
-            "Impact_Line": [m*x.min()+b, m*x.max()+b]
-        })
-        
         st.vega_lite_chart(
             scatter_df,
             {
-                "layer": [
-                    {
-                        "mark": {"type": "circle", "opacity": 0.6, "size": 100},
-                        "encoding": {
-                            "x": {
-                                "field": "InsomniaSeverity_index",
-                                "type": "quantitative",
-                                "title": "Insomnia Severity Index",
-                                "scale": {"zero": False}
-                            },
-                            "y": {
-                                "field": "AcademicImpact_index",
-                                "type": "quantitative",
-                                "title": "Academic Impact Index",
-                                "scale": {"zero": False}
-                            },
-                            "color": {
-                                "field": "AcademicImpact_index",
-                                "type": "quantitative",
-                                "scale": {"scheme": "redyellowblue", "reverse": True},
-                                "legend": {"title": "Impact Level"}
-                            },
-                            "tooltip": [
-                                {"field": "InsomniaSeverity_index", "format": ".2f", "title": "Insomnia"},
-                                {"field": "AcademicImpact_index", "format": ".2f", "title": "Impact"}
-                            ]
-                        }
-                    }
-                ],
+                "mark": {"type": "circle", "opacity": 0.6, "size": 100},
+                "encoding": {
+                    "x": {
+                        "field": "InsomniaSeverity_index",
+                        "type": "quantitative",
+                        "title": "Insomnia Severity Index",
+                        "scale": {"zero": False},
+                        "axis": {"labelFontSize": 12}
+                    },
+                    "y": {
+                        "field": "AcademicImpact_index",
+                        "type": "quantitative",
+                        "title": "Academic Impact Index",
+                        "scale": {"zero": False},
+                        "axis": {"labelFontSize": 12}
+                    },
+                    "color": {
+                        "field": "AcademicImpact_index",
+                        "type": "quantitative",
+                        "scale": {"scheme": "redyellowblue", "reverse": True},
+                        "legend": {"title": "Impact Level"}
+                    },
+                    "tooltip": [
+                        {"field": "InsomniaSeverity_index", "format": ".2f", "title": "Insomnia"},
+                        {"field": "AcademicImpact_index", "format": ".2f", "title": "Impact"}
+                    ]
+                },
                 "width": "container",
                 "height": 400
             },
@@ -313,13 +452,15 @@ if need.issubset(df_filtered.columns):
                 "x": {
                     "field": "Group",
                     "type": "ordinal",
-                    "title": "Insomnia Severity Group"
+                    "title": "Insomnia Severity Group",
+                    "axis": {"labelFontSize": 12}
                 },
                 "y": {
                     "field": "Performance",
                     "type": "quantitative",
                     "title": "Average Academic Performance Score",
-                    "scale": {"domain": [0, 5]}
+                    "scale": {"domain": [0, 5]},
+                    "axis": {"labelFontSize": 12}
                 },
                 "color": {
                     "field": "Group",
@@ -400,8 +541,18 @@ if len(available_cols) >= 3:
             {
                 "mark": "rect",
                 "encoding": {
-                    "x": {"field": "Var2_Label", "type": "nominal", "title": None},
-                    "y": {"field": "Var1_Label", "type": "nominal", "title": None},
+                    "x": {
+                        "field": "Var2_Label",
+                        "type": "nominal",
+                        "title": None,
+                        "axis": {"labelFontSize": 11}
+                    },
+                    "y": {
+                        "field": "Var1_Label",
+                        "type": "nominal",
+                        "title": None,
+                        "axis": {"labelFontSize": 11}
+                    },
                     "color": {
                         "field": "Correlation",
                         "type": "quantitative",
