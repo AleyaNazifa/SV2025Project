@@ -11,7 +11,10 @@ st.set_page_config(
     page_title="UMK Sleep & Academic Dashboard", 
     layout="wide",
     page_icon="🌙",
-    initial_sidebar_state="expanded"
+    initial_sidebar_state="expanded",
+    menu_items={
+        'About': "UMK Sleep & Academic Performance Dashboard"
+    }
 )
 
 # Custom CSS - Clean Professional Style
@@ -19,16 +22,42 @@ st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
     
+    /* FORCE LIGHT MODE - Override all dark theme settings */
+    :root {
+        color-scheme: light !important;
+    }
+    
     /* Main app styling */
     .stApp {
-        background-color: #f7fafc;
+        background-color: #f7fafc !important;
         font-family: 'Inter', sans-serif;
+    }
+    
+    /* Force main content area to be white/light */
+    .main {
+        background-color: #f7fafc !important;
     }
     
     .main .block-container {
         padding-top: 3rem;
         padding-bottom: 3rem;
         max-width: 1400px;
+        background-color: #f7fafc !important;
+    }
+    
+    /* Override any dark theme */
+    [data-testid="stAppViewContainer"] {
+        background-color: #f7fafc !important;
+    }
+    
+    [data-testid="stHeader"] {
+        background-color: #ffffff !important;
+    }
+    
+    /* Force all backgrounds to light */
+    body {
+        background-color: #f7fafc !important;
+        color: #2d3748 !important;
     }
     
     /* Headers */
@@ -50,6 +79,11 @@ st.markdown("""
         color: #4a5568 !important;
         font-size: 1.25rem !important;
         font-weight: 600 !important;
+    }
+    
+    /* Fix any markdown text colors */
+    .main p, .main span, .main div {
+        color: #2d3748 !important;
     }
     
     /* Sidebar */
