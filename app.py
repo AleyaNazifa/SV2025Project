@@ -6,7 +6,12 @@ from data_loader import (
     set_dataframe_in_session,
 )
 
-# MUST BE FIRST - Page config
+# ===== CONFIGURATION =====
+# Set your Google Sheet CSV URL here for auto-loading
+DEFAULT_GOOGLE_SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSf4umx6QNDel99If8P2otizAHj7jEDxFIsqandbD0zYVzfDheZo2YVkK1_zknpDKjHnBuYWCINgcCe/pub?output=csv"
+# =========================
+
+# Page configuration
 st.set_page_config(
     page_title="UMK Sleep & Academic Dashboard", 
     layout="wide",
@@ -14,36 +19,50 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# ===== CONFIGURATION: Set your Google Sheet URL here =====
-# This URL will auto-load data without user input
-DEFAULT_GOOGLE_SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSf4umx6QNDel99If8P2otizAHj7jEDxFIsqandbD0zYVzfDheZo2YVkK1_zknpDKjHnBuYWCINgcCe/pub?output=csv"
-# ==========================================================
-
-# Professional styling with better colors
+# Professional styling
 st.markdown("""
 <style>
-    /* Force light theme */
-    .stApp {
-        background-color: #fafbfc;
+    /* Import professional font */
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+    
+    /* Global font */
+    * {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     }
     
-    /* Professional sidebar */
+    /* Main app background */
+    .stApp {
+        background-color: #fafbfc !important;
+    }
+    
+    /* Main content */
+    .main {
+        background-color: #fafbfc !important;
+    }
+    
+    .main .block-container {
+        background-color: #fafbfc !important;
+        padding: 2.5rem 1.5rem;
+        max-width: 1400px;
+    }
+    
+    /* Sidebar professional styling */
     section[data-testid="stSidebar"] {
-        background: linear-gradient(180deg, #f8f9fa 0%, #ffffff 100%);
-        border-right: 1px solid #d1d5db;
+        background: linear-gradient(180deg, #f8f9fa 0%, #ffffff 100%) !important;
+        border-right: 1px solid #dee2e6 !important;
     }
     
     section[data-testid="stSidebar"] > div {
-        background-color: transparent;
-        padding-top: 1.5rem;
+        background-color: transparent !important;
+        padding-top: 2rem;
     }
     
-    /* Sidebar headings - professional gray tones */
+    /* Sidebar text colors */
     section[data-testid="stSidebar"] h1,
     section[data-testid="stSidebar"] h2,
-    section[data-testid="stSidebar"] h3 {
+    section[data-testid="stSidebar"] h3,
+    section[data-testid="stSidebar"] .stMarkdown {
         color: #1f2937 !important;
-        font-weight: 600 !important;
     }
     
     section[data-testid="stSidebar"] p,
@@ -52,32 +71,23 @@ st.markdown("""
         color: #4b5563 !important;
     }
     
-    section[data-testid="stSidebar"] .stCaption {
-        color: #6b7280 !important;
-        font-size: 0.8rem !important;
-    }
-    
-    /* Radio buttons styling */
+    /* Sidebar radio buttons */
     section[data-testid="stSidebar"] .stRadio > div {
         background-color: white;
-        padding: 0.5rem;
-        border-radius: 6px;
+        padding: 0.75rem;
+        border-radius: 8px;
         border: 1px solid #e5e7eb;
     }
     
-    section[data-testid="stSidebar"] .stRadio label {
-        color: #374151 !important;
-    }
-    
-    /* Professional button - blue accent */
+    /* Sidebar button */
     section[data-testid="stSidebar"] .stButton > button {
         background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important;
         color: white !important;
-        width: 100%;
+        border: none !important;
         border-radius: 8px;
-        padding: 0.7rem;
+        padding: 0.7rem 1.5rem;
         font-weight: 600;
-        border: none;
+        width: 100%;
         box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3);
         transition: all 0.2s;
     }
@@ -88,67 +98,44 @@ st.markdown("""
         transform: translateY(-1px);
     }
     
-    /* Dividers */
-    section[data-testid="stSidebar"] hr {
-        border-color: #e5e7eb;
-        margin: 1.2rem 0;
-    }
-    
-    /* Expander styling */
-    section[data-testid="stSidebar"] .streamlit-expanderHeader {
-        background-color: #f3f4f6;
-        border-radius: 6px;
-        color: #374151 !important;
-        font-weight: 500;
-    }
-    
-    /* Main content area */
-    .main .block-container {
-        background-color: #fafbfc;
-        padding: 2.5rem 1.5rem;
-    }
-    
-    /* Main headings */
+    /* Main content headings */
     .main h1 {
-        color: #111827;
-        font-weight: 700;
-        font-size: 2.25rem;
-        margin-bottom: 0.5rem;
+        color: #111827 !important;
+        font-weight: 700 !important;
+        font-size: 2.5rem !important;
     }
     
     .main h2 {
-        color: #1f2937;
-        font-weight: 600;
-        font-size: 1.5rem;
-        margin-top: 2rem;
-        margin-bottom: 1rem;
+        color: #1f2937 !important;
+        font-weight: 600 !important;
+        font-size: 1.75rem !important;
+        margin-top: 2rem !important;
     }
     
     .main h3 {
-        color: #374151;
-        font-weight: 600;
-        font-size: 1.2rem;
+        color: #374151 !important;
+        font-weight: 600 !important;
     }
     
     .main p {
-        color: #4b5563;
+        color: #4b5563 !important;
         line-height: 1.7;
     }
     
-    /* Professional stat cards */
+    /* Stat cards */
     .stat-card {
         background: white;
-        border-radius: 10px;
-        padding: 1.75rem;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06);
+        border-radius: 12px;
+        padding: 2rem;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.08);
         border: 1px solid #e5e7eb;
         text-align: center;
-        transition: all 0.2s;
+        transition: all 0.3s ease;
     }
     
     .stat-card:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 4px 6px rgba(0,0,0,0.1), 0 2px 4px rgba(0,0,0,0.06);
+        transform: translateY(-4px);
+        box-shadow: 0 4px 6px rgba(0,0,0,0.15), 0 2px 4px rgba(0,0,0,0.08);
     }
     
     .stat-icon {
@@ -157,52 +144,55 @@ st.markdown("""
     }
     
     .stat-value {
-        font-size: 2.25rem;
+        font-size: 2.5rem;
         font-weight: 700;
         color: #111827;
         margin: 0.5rem 0;
     }
     
     .stat-label {
-        font-size: 0.875rem;
+        font-size: 0.75rem;
         color: #6b7280;
-        font-weight: 500;
+        font-weight: 600;
         text-transform: uppercase;
         letter-spacing: 0.05em;
     }
     
-    /* Objective box - professional blue accent */
+    /* Objective box */
     .objective-box {
         background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
         border-left: 4px solid #3b82f6;
-        border-radius: 10px;
+        border-radius: 12px;
         padding: 2rem;
         margin: 2rem 0;
-        box-shadow: 0 1px 3px rgba(59, 130, 246, 0.1);
+        box-shadow: 0 1px 3px rgba(59, 130, 246, 0.15);
     }
     
     .objective-box h3 {
         color: #1e40af !important;
         margin-top: 0 !important;
+        font-size: 1.25rem !important;
     }
     
     .objective-box p {
         color: #1f2937 !important;
+        font-size: 1.05rem;
+        line-height: 1.8;
     }
     
     /* Navigation cards */
     .nav-card {
         background: white;
-        border-radius: 10px;
-        padding: 1.75rem;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06);
+        border-radius: 12px;
+        padding: 2rem;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.08);
         border: 1px solid #e5e7eb;
-        transition: all 0.2s;
+        transition: all 0.3s ease;
         height: 100%;
     }
     
     .nav-card:hover {
-        box-shadow: 0 4px 6px rgba(0,0,0,0.1), 0 2px 4px rgba(0,0,0,0.06);
+        box-shadow: 0 4px 6px rgba(0,0,0,0.15), 0 2px 4px rgba(0,0,0,0.08);
         transform: translateY(-2px);
         border-color: #3b82f6;
     }
@@ -210,57 +200,69 @@ st.markdown("""
     .nav-card h3 {
         color: #3b82f6 !important;
         margin-top: 0 !important;
-        font-size: 1.1rem !important;
+        font-size: 1.15rem !important;
+        font-weight: 600 !important;
     }
     
     .nav-card p {
         color: #6b7280 !important;
         margin-bottom: 0 !important;
         font-size: 0.9rem !important;
+        line-height: 1.6;
     }
     
     /* Metrics */
     [data-testid="stMetricValue"] {
-        color: #111827;
-        font-size: 1.75rem;
-        font-weight: 700;
+        color: #111827 !important;
+        font-size: 1.75rem !important;
+        font-weight: 700 !important;
     }
     
     [data-testid="stMetricLabel"] {
-        color: #6b7280;
-        font-size: 0.875rem;
-        font-weight: 500;
+        color: #6b7280 !important;
+        font-size: 0.875rem !important;
+        font-weight: 500 !important;
     }
     
-    /* Alert boxes */
+    /* Alerts */
     .stSuccess {
         background-color: #d1fae5 !important;
         border-left: 4px solid #10b981 !important;
         color: #065f46 !important;
+        border-radius: 8px !important;
     }
     
     .stInfo {
         background-color: #dbeafe !important;
         border-left: 4px solid #3b82f6 !important;
         color: #1e40af !important;
+        border-radius: 8px !important;
     }
     
-    /* Divider */
+    /* Dividers */
     hr {
         border: none;
         border-top: 1px solid #e5e7eb;
         margin: 2rem 0;
     }
+    
+    /* File uploader */
+    [data-testid="stFileUploader"] {
+        background-color: white;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        padding: 1rem;
+    }
 </style>
 """, unsafe_allow_html=True)
 
-# Sidebar
+# ===== SIDEBAR =====
 with st.sidebar:
     st.markdown("### 📊 Data Source")
-    st.caption("Choose how to load your data")
+    st.caption("Select how to load your data")
     
     mode = st.radio(
-        "Select input method",
+        "Mode",
         ["🔄 Auto-Load (Google Sheet)", "📁 Manual Upload"],
         label_visibility="collapsed"
     )
@@ -268,71 +270,61 @@ with st.sidebar:
     st.divider()
     
     st.markdown("### 🔄 Data Management")
-    if st.button("Refresh Data", use_container_width=True, type="primary"):
+    if st.button("Refresh Data", use_container_width=True):
         st.cache_data.clear()
         st.rerun()
     st.caption("Click to reload latest data")
     
     st.divider()
     
-    with st.expander("❓ Help & Info"):
+    with st.expander("❓ Help"):
         st.markdown("""
-        **Auto-Load Mode:**
+        **Auto-Load:**
         - Data loads automatically
         - Updates every 5 minutes
-        - No manual input needed
         
         **Manual Upload:**
         - Upload your own CSV
         - Full control over data
-        - Useful for testing
         """)
     
     st.markdown("---")
-    st.caption("**UMK Sleep Study Dashboard**")
-    st.caption("Version 1.0 • Last updated: 2024")
+    st.caption("UMK Sleep Study v1.0")
 
-# Load data based on mode
+# ===== DATA LOADING =====
 if mode == "🔄 Auto-Load (Google Sheet)":
-    # Automatically load from the configured URL
-    with st.spinner("📥 Loading data from Google Sheets..."):
+    with st.spinner("📥 Loading data..."):
         try:
             df = load_from_url(DEFAULT_GOOGLE_SHEET_URL)
             with st.sidebar:
-                st.success("✅ Data auto-loaded")
-                st.caption(f"{len(df)} responses loaded")
+                st.success("✅ Data loaded")
+                st.caption(f"{len(df)} responses")
         except Exception as e:
-            st.error(f"❌ Failed to load data: {str(e)}")
-            st.info("💡 Try switching to Manual Upload mode or check your internet connection")
+            st.error(f"❌ Error: {str(e)}")
             st.stop()
 else:
     with st.sidebar:
-        st.markdown("### 📤 Upload File")
-        uploaded = st.file_uploader(
-            "Choose CSV file",
-            type=["csv"],
-            help="Maximum file size: 200MB"
-        )
+        st.markdown("### 📤 Upload CSV")
+        uploaded = st.file_uploader("Choose file", type=["csv"])
     
     if uploaded is None:
-        st.title("🌙 UMK Sleep & Academic Study")
-        st.markdown("**Research Dashboard for Sleep Quality Analysis**")
+        st.title("🌙 UMK Sleep Study")
+        st.markdown("**Research Dashboard**")
         st.divider()
-        st.info("👈 **Upload your CSV file in the sidebar to begin analysis**")
+        st.info("👈 Upload CSV to begin")
         st.stop()
     
-    with st.spinner("📥 Processing file..."):
+    with st.spinner("📥 Processing..."):
         df = load_from_upload(uploaded)
         with st.sidebar:
             st.success(f"✅ {uploaded.name}")
-            st.caption(f"{len(df)} responses loaded")
 
 # Process data
 df = ensure_engineered_columns(df)
 set_dataframe_in_session(df)
 
-# Main Dashboard
-st.title("🌙 UMK Sleep & Academic Study Dashboard")
+# ===== MAIN DASHBOARD =====
+st.title("🌙 UMK Sleep & Academic Study")
 st.markdown("**Comprehensive Analysis of Sleep Quality and Academic Performance**")
 st.divider()
 
@@ -340,17 +332,16 @@ st.divider()
 st.markdown("""
 <div class="objective-box">
     <h3>🎯 Research Objective</h3>
-    <p style='font-size: 1.05rem; line-height: 1.8; margin-bottom: 0;'>
+    <p>
         Analyze the <strong>relationship between sleep quality and academic performance</strong> among 
         UMK students to identify correlations between insomnia severity, sleep patterns, 
-        lifestyle factors, and educational outcomes. This research aims to provide evidence-based 
-        insights for improving student wellness and academic success.
+        lifestyle factors, and educational outcomes.
     </p>
 </div>
 """, unsafe_allow_html=True)
 
-# Summary Statistics
-st.markdown("## 📊 Key Statistics Overview")
+# Key Stats
+st.markdown("## 📊 Key Statistics")
 
 col1, col2, col3, col4 = st.columns(4)
 
@@ -359,7 +350,7 @@ with col1:
     <div class="stat-card">
         <div class="stat-icon">📝</div>
         <div class="stat-value">{len(df)}</div>
-        <div class="stat-label">Total Responses</div>
+        <div class="stat-label">Responses</div>
     </div>
     """, unsafe_allow_html=True)
 
@@ -370,7 +361,7 @@ with col2:
         <div class="stat-card">
             <div class="stat-icon">😴</div>
             <div class="stat-value">{val:.2f}</div>
-            <div class="stat-label">Insomnia Severity</div>
+            <div class="stat-label">Insomnia Index</div>
         </div>
         """, unsafe_allow_html=True)
 
@@ -398,7 +389,7 @@ with col4:
 
 st.markdown("<br>", unsafe_allow_html=True)
 
-# Additional metrics
+# Additional Metrics
 c1, c2, c3 = st.columns(3)
 with c1:
     if "SleepQuality_score" in df.columns:
@@ -408,12 +399,12 @@ with c2:
         st.metric("😰 Stress Level", f"{df['Stress_score'].mean():.2f} / 4")
 with c3:
     if "AcademicPerformance_score" in df.columns:
-        st.metric("📚 Academic Performance", f"{df['AcademicPerformance_score'].mean():.2f} / 5")
+        st.metric("📚 Performance", f"{df['AcademicPerformance_score'].mean():.2f} / 5")
 
 st.divider()
 
 # Navigation
-st.markdown("## 🧭 Explore Analysis Sections")
+st.markdown("## 🧭 Explore Sections")
 
 nc1, nc2, nc3 = st.columns(3)
 
@@ -421,7 +412,7 @@ with nc1:
     st.markdown("""
     <div class="nav-card">
         <h3>🏠 Home</h3>
-        <p>Dataset overview, demographics, and detailed statistics about the survey responses</p>
+        <p>Dataset overview and detailed statistics</p>
     </div>
     """, unsafe_allow_html=True)
 
@@ -429,7 +420,7 @@ with nc2:
     st.markdown("""
     <div class="nav-card">
         <h3>📈 Visualizations</h3>
-        <p>Comprehensive charts, graphs, and statistical analysis of sleep patterns</p>
+        <p>Comprehensive charts and analysis</p>
     </div>
     """, unsafe_allow_html=True)
 
@@ -437,25 +428,9 @@ with nc3:
     st.markdown("""
     <div class="nav-card">
         <h3>👥 Comparisons</h3>
-        <p>Compare metrics across demographics, faculties, and student groups</p>
+        <p>Compare across demographics</p>
     </div>
     """, unsafe_allow_html=True)
 
 st.divider()
-st.success(f"✅ Dashboard ready • {len(df)} responses • {df.shape[1]} features analyzed • Auto-refresh enabled")
-
-with st.expander("ℹ️ About This Dashboard"):
-    st.markdown("""
-    **UMK Sleep & Academic Performance Research Dashboard**
-    
-    This interactive dashboard provides comprehensive analysis of sleep quality and its impact 
-    on academic performance among Universiti Malaysia Kelantan students. Features include:
-    
-    - **Real-time data synchronization** from Google Sheets
-    - **Interactive visualizations** with filtering capabilities
-    - **Statistical analysis** of sleep patterns and academic outcomes
-    - **Demographic comparisons** across different student groups
-    - **Correlation analysis** between lifestyle factors and performance
-    
-    Data is automatically refreshed every 5 minutes to ensure you always have the latest insights.
-    """)
+st.success(f"✅ Ready • {len(df)} responses • {df.shape[1]} features")
