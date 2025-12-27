@@ -1,6 +1,17 @@
+"""
+Insomnia Visualization Page
+Shows 5 comprehensive visualizations with filters
+"""
+
 import numpy as np
 import pandas as pd
 import streamlit as st
+import sys
+from pathlib import Path
+
+# Add parent directory to path to import modules
+sys.path.append(str(Path(__file__).parent.parent))
+
 from data_loader import get_dataframe_from_session
 from styles import apply_global_styles
 
@@ -15,7 +26,7 @@ st.markdown("---")
 
 df = get_dataframe_from_session()
 if df is None:
-    st.warning("⚠️ No data loaded. Please go to the Home page to load your dataset.")
+    st.warning("⚠️ No data loaded. Please go to the main app page to load your dataset first.")
     st.stop()
 
 # ===== SIDEBAR FILTERS =====
