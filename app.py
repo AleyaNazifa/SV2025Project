@@ -1,20 +1,17 @@
 """
 Main entry point for UMK Sleep Study Dashboard
-This is the home page that users see first
 """
 
 import streamlit as st
+import numpy as np
 from data_loader import (
     load_from_url,
     load_from_upload,
     ensure_engineered_columns,
     set_dataframe_in_session,
 )
-from styles import apply_global_styles
 
-# ===== CONFIGURATION =====
-DEFAULT_GOOGLE_SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSf4umx6QNDel99If8P2otizAHj7jEDxFIsqandbD0zYVzfDheZo2YVkK1_zknpDKjHnBuYWCINgcCe/pub?output=csv"
-
+# Must be first Streamlit command
 st.set_page_config(
     page_title="UMK Sleep Study", 
     layout="wide",
@@ -22,8 +19,12 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Apply global styles
+# Import and apply styles AFTER set_page_config
+from styles import apply_global_styles
 apply_global_styles()
+
+# ===== CONFIGURATION =====
+DEFAULT_GOOGLE_SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSf4umx6QNDel99If8P2otizAHj7jEDxFIsqandbD0zYVzfDheZo2YVkK1_zknpDKjHnBuYWCINgcCe/pub?output=csv"
 
 # ===== SIDEBAR =====
 with st.sidebar:
@@ -94,65 +95,59 @@ st.markdown("**Comprehensive Analysis Dashboard • UMK Research Project**")
 st.markdown("---")
 
 # Objective Section
-st.markdown("## 🎯 Research Objective")
+st.subheader("🎯 Research Objective")
 st.info("""
-To investigate the **relationship between sleep quality and academic performance** 
-among UMK students, examining how insomnia severity, sleep patterns, and lifestyle factors 
-correlate with educational outcomes and daily functioning.
+**To investigate the relationship between sleep quality and academic performance** among UMK students, 
+examining how insomnia severity, sleep patterns, and lifestyle factors correlate with educational 
+outcomes and daily functioning.
 """)
 
-# Key Statistics Cards
-st.markdown("## 📊 Key Insights at a Glance")
-st.markdown("")
+st.markdown("---")
+
+# Key Statistics
+st.subheader("📊 Key Insights at a Glance")
 
 col1, col2, col3, col4 = st.columns(4)
 
 with col1:
-    st.markdown(f"""
-    <div class="stat-box">
-        <div class="stat-icon">📝</div>
-        <div class="stat-value">{len(df)}</div>
-        <div class="stat-label">Total Responses</div>
-    </div>
-    """, unsafe_allow_html=True)
+    st.metric(
+        label="📝 Total Responses", 
+        value=f"{len(df):,}",
+        help="Total number of survey responses"
+    )
 
 with col2:
     if "InsomniaSeverity_index" in df.columns:
         val = df['InsomniaSeverity_index'].mean()
-        st.markdown(f"""
-        <div class="stat-box">
-            <div class="stat-icon">😴</div>
-            <div class="stat-value">{val:.2f}</div>
-            <div class="stat-label">Avg Insomnia Index</div>
-        </div>
-        """, unsafe_allow_html=True)
+        st.metric(
+            label="😴 Insomnia Index", 
+            value=f"{val:.2f}",
+            help="Average insomnia severity index (0-4 scale)"
+        )
 
 with col3:
     if "AcademicImpact_index" in df.columns:
         val = df['AcademicImpact_index'].mean()
-        st.markdown(f"""
-        <div class="stat-box">
-            <div class="stat-icon">🎓</div>
-            <div class="stat-value">{val:.2f}</div>
-            <div class="stat-label">Academic Impact</div>
-        </div>
-        """, unsafe_allow_html=True)
+        st.metric(
+            label="🎓 Academic Impact", 
+            value=f"{val:.2f}",
+            help="Average academic impact score"
+        )
 
 with col4:
     if "SleepHours_est" in df.columns:
         val = df['SleepHours_est'].mean()
-        st.markdown(f"""
-        <div class="stat-box">
-            <div class="stat-icon">⏰</div>
-            <div class="stat-value">{val:.1f}h</div>
-            <div class="stat-label">Avg Sleep Hours</div>
-        </div>
-        """, unsafe_allow_html=True)
+        st.metric(
+            label="⏰ Avg Sleep", 
+            value=f"{val:.1f}h",
+            help="Average sleep hours per night"
+        )
 
-st.markdown("<br>", unsafe_allow_html=True)
+st.markdown("---")
 
 # Additional Metrics Row
-st.markdown("### 📈 Additional Metrics")
+st.subheader("📈 Additional Metrics")
+
 c1, c2, c3, c4 = st.columns(4)
 
 with c1:
@@ -183,7 +178,6 @@ with c4:
     if "InsomniaSeverity_index" in df.columns and "AcademicImpact_index" in df.columns:
         corr_data = df[["InsomniaSeverity_index", "AcademicImpact_index"]].dropna()
         if len(corr_data) > 2:
-            import numpy as np
             corr = np.corrcoef(corr_data["InsomniaSeverity_index"], corr_data["AcademicImpact_index"])[0, 1]
             st.metric(
                 "🔗 Correlation", 
@@ -205,11 +199,11 @@ with st.expander("🔍 View Dataset Preview"):
 st.markdown("---")
 
 # Navigation Info
-st.markdown("## 🧭 Navigate to Other Pages")
+st.subheader("🧭 Navigate to Other Pages")
 st.info("""
 **Use the sidebar to explore different sections:**
 - 📊 **Insomnia Visualisation** - Interactive charts and analysis
 - 👥 **Subgroup Comparison** - Compare across demographics
 """)
 
-st.success(f"✅ Dashboard ready • {len(df)} responses loaded • All features engineered")
+st.success(f"✅ Dashboard ready • {len(df):,} responses loaded • All features engineered")
