@@ -6,7 +6,7 @@ from data_loader import (
     set_dataframe_in_session,
 )
 
-# Page config with custom theme
+# Page config
 st.set_page_config(
     page_title="UMK Sleep & Academic Dashboard", 
     layout="wide",
@@ -14,300 +14,377 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Custom CSS for beautiful styling
+# Custom CSS - Clean Professional Style
 st.markdown("""
     <style>
-    /* Import Google Fonts */
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
     
-    /* Main app background */
+    /* Main app styling */
     .stApp {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background-color: #f7fafc;
         font-family: 'Inter', sans-serif;
     }
     
-    /* Main content area */
     .main .block-container {
-        padding-top: 2rem;
-        padding-bottom: 2rem;
-        max-width: 1200px;
+        padding-top: 3rem;
+        padding-bottom: 3rem;
+        max-width: 1400px;
     }
     
-    /* Title styling - WHITE and VISIBLE */
+    /* Headers */
     h1 {
-        color: #ffffff !important;
+        color: #1a202c !important;
         font-size: 2.5rem !important;
         font-weight: 700 !important;
-        text-shadow: 2px 2px 8px rgba(0,0,0,0.3);
         margin-bottom: 0.5rem !important;
-        font-family: 'Inter', sans-serif !important;
     }
     
-    /* Subtitle/Caption styling - WHITE */
-    .stMarkdown p, [data-testid="stMarkdownContainer"] p {
-        color: #f0f0f0 !important;
-        font-size: 1.05rem !important;
-        text-shadow: 1px 1px 3px rgba(0,0,0,0.2);
-    }
-    
-    /* Info/Alert boxes - WHITE BACKGROUND for readability */
-    .stAlert, [data-testid="stAlert"] {
-        background-color: rgba(255, 255, 255, 0.95) !important;
-        border-radius: 15px !important;
-        padding: 1.5rem !important;
-        box-shadow: 0 8px 16px rgba(0,0,0,0.2) !important;
+    h2 {
         color: #2d3748 !important;
+        font-size: 1.5rem !important;
+        font-weight: 600 !important;
+        margin-top: 2rem !important;
     }
     
-    .stAlert p {
-        color: #2d3748 !important;
-        text-shadow: none !important;
+    h3 {
+        color: #4a5568 !important;
+        font-size: 1.25rem !important;
+        font-weight: 600 !important;
     }
     
-    /* Success box */
-    [data-testid="stSuccess"], .stSuccess {
-        background: rgba(72, 187, 120, 0.95) !important;
-        color: white !important;
-        border: none !important;
-    }
-    
-    /* Sidebar styling */
+    /* Sidebar */
     [data-testid="stSidebar"] {
-        background: linear-gradient(180deg, #2d3748 0%, #1a202c 100%);
+        background-color: #ffffff;
+        border-right: 1px solid #e2e8f0;
     }
     
-    [data-testid="stSidebar"] * {
-        color: #ffffff !important;
+    [data-testid="stSidebar"] h2 {
+        color: #2d3748 !important;
+        font-size: 1.1rem !important;
+        font-weight: 600 !important;
     }
     
-    [data-testid="stSidebar"] h2, [data-testid="stSidebar"] h3 {
-        color: #ffffff !important;
-    }
-    
-    /* Button styling */
+    /* Buttons */
     .stButton > button {
-        background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
-        color: white !important;
+        background-color: #4299e1;
+        color: white;
         border: none;
-        border-radius: 25px;
-        padding: 0.75rem 2rem;
-        font-weight: 600;
-        transition: all 0.3s ease;
-        box-shadow: 0 4px 12px rgba(72, 187, 120, 0.4);
-        font-family: 'Inter', sans-serif;
+        border-radius: 8px;
+        padding: 0.5rem 1.5rem;
+        font-weight: 500;
+        transition: all 0.2s;
     }
     
     .stButton > button:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(72, 187, 120, 0.6);
-        background: linear-gradient(135deg, #38a169 0%, #2f855a 100%);
-    }
-    
-    /* Radio button styling */
-    .stRadio > label {
-        font-weight: 600 !important;
-        color: #ffffff !important;
-        font-size: 1.05rem !important;
-    }
-    
-    /* Text input styling */
-    .stTextInput > div > div > input {
-        border-radius: 10px;
-        border: 2px solid #667eea;
-        padding: 0.75rem;
-        background: white;
-    }
-    
-    .stTextInput > label {
-        color: #ffffff !important;
-        font-weight: 600 !important;
-    }
-    
-    /* Code block in sidebar */
-    [data-testid="stSidebar"] code {
-        background: rgba(255, 255, 255, 0.1) !important;
-        color: #90cdf4 !important;
-        padding: 0.5rem;
-        border-radius: 5px;
-        display: block;
-        word-break: break-all;
-    }
-    
-    /* Recommendation cards */
-    .recommendation-card {
-        background: rgba(255, 255, 255, 0.95);
-        border-radius: 15px;
-        padding: 2rem;
-        margin: 1.5rem 0;
-        box-shadow: 0 8px 16px rgba(0,0,0,0.2);
-    }
-    
-    .recommendation-card h3 {
-        color: #667eea !important;
-        margin-bottom: 1rem !important;
-        text-shadow: none !important;
-    }
-    
-    .recommendation-card p, .recommendation-card ul, .recommendation-card li {
-        color: #2d3748 !important;
-        text-shadow: none !important;
+        background-color: #3182ce;
+        box-shadow: 0 4px 6px rgba(50, 50, 93, 0.11);
     }
     
     /* Metric cards */
+    [data-testid="stMetricValue"] {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #2d3748;
+    }
+    
+    [data-testid="stMetricLabel"] {
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: #718096;
+    }
+    
+    /* Custom cards */
     .metric-card {
-        background: rgba(255, 255, 255, 0.95);
-        border-radius: 15px;
+        background: white;
+        border-radius: 12px;
         padding: 1.5rem;
-        text-align: center;
-        box-shadow: 0 8px 16px rgba(0,0,0,0.2);
-        transition: transform 0.3s ease;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        border: 1px solid #e2e8f0;
+        transition: all 0.2s;
     }
     
     .metric-card:hover {
-        transform: translateY(-5px);
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        transform: translateY(-2px);
     }
     
-    /* File uploader */
-    [data-testid="stFileUploader"] {
-        background: rgba(255, 255, 255, 0.1);
-        border-radius: 10px;
-        padding: 1rem;
+    .objective-card {
+        background: white;
+        border-radius: 12px;
+        padding: 2rem;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        border: 1px solid #e2e8f0;
+        margin: 2rem 0;
     }
     
-    [data-testid="stFileUploader"] label {
-        color: #ffffff !important;
-        font-weight: 600 !important;
+    .summary-box {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        border: 1px solid #e2e8f0;
+        text-align: center;
+    }
+    
+    .icon-badge {
+        font-size: 2rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    /* Alert boxes */
+    .stAlert {
+        border-radius: 8px;
+        border-left: 4px solid #4299e1;
+    }
+    
+    /* Input fields */
+    .stTextInput input {
+        border-radius: 8px;
+        border: 1px solid #cbd5e0;
+    }
+    
+    /* Radio buttons */
+    .stRadio > label {
+        font-weight: 500;
+        color: #4a5568;
+    }
+    
+    /* Section divider */
+    hr {
+        margin: 2rem 0;
+        border: none;
+        border-top: 1px solid #e2e8f0;
     }
     </style>
 """, unsafe_allow_html=True)
 
-# Header with emoji
-st.title("🌙 UMK Insomnia & Educational Outcomes")
-st.markdown("**📊 Multi-page Streamlit application for sleep quality and academic performance analysis**")
-
 # Sidebar configuration
-st.sidebar.markdown("### 🔧 Data Source Configuration")
-mode = st.sidebar.radio("Select data source mode", ["🌐 Live Google Sheet (Auto)", "📁 Upload CSV"], index=0)
+st.sidebar.title("⚙️ Configuration")
+st.sidebar.markdown("---")
 
-refresh = st.sidebar.button("🔄 Refresh Data Now")
-if refresh:
+mode = st.sidebar.radio(
+    "Data Source",
+    ["🌐 Live Google Sheet", "📁 Upload CSV"],
+    index=0
+)
+
+if st.sidebar.button("🔄 Refresh Data", use_container_width=True):
     st.cache_data.clear()
     st.rerun()
 
-# Data loading logic
-if mode == "🌐 Live Google Sheet (Auto)":
-    st.sidebar.markdown("---")
-    st.sidebar.markdown("**📝 Example URL format:**")
-    st.sidebar.code("https://docs.google.com/.../pub?output=csv")
+st.sidebar.markdown("---")
+
+# Data loading
+if mode == "🌐 Live Google Sheet":
+    st.sidebar.markdown("**Google Sheet URL**")
+    st.sidebar.caption("Enter your published CSV URL")
     
-    csv_url = st.sidebar.text_input("Google Sheet CSV URL", value="", placeholder="Paste your CSV URL here...")
+    csv_url = st.sidebar.text_input(
+        "CSV URL",
+        value="",
+        placeholder="https://docs.google.com/.../pub?output=csv",
+        label_visibility="collapsed"
+    )
     
     if not csv_url.strip():
-        st.markdown("""
-        <div class="recommendation-card">
-            <h3>👋 Welcome to the UMK Sleep Dashboard!</h3>
-            <p>To get started, please enter your Google Sheet CSV URL in the sidebar.</p>
-            <br>
-            <p><strong>How to get your CSV URL:</strong></p>
-            <ul>
-                <li>Open your Google Sheet</li>
-                <li>Go to File → Share → Publish to web</li>
-                <li>Select "Comma-separated values (.csv)" format</li>
-                <li>Copy the URL and paste it in the sidebar</li>
-            </ul>
-        </div>
-        """, unsafe_allow_html=True)
+        # Welcome screen
+        st.markdown("# 🌙 UMK Insomnia & Educational Outcomes Dashboard")
+        st.markdown("### Multi-page application for sleep quality and academic performance analysis")
+        st.markdown("---")
+        
+        st.info("👈 **Enter your Google Sheet CSV URL in the sidebar to begin**")
+        
+        with st.expander("📖 How to get your CSV URL"):
+            st.markdown("""
+            1. Open your Google Sheet
+            2. Go to **File** → **Share** → **Publish to web**
+            3. Select **Comma-separated values (.csv)** format
+            4. Copy the URL and paste it in the sidebar
+            5. Click outside the input box to load data
+            """)
+        
+        with st.expander("📊 Expected Data Format"):
+            st.markdown("""
+            Your CSV should contain columns for:
+            - Sleep quality measurements
+            - Academic performance metrics
+            - Student demographics (age, gender, faculty, year)
+            - Lifestyle factors (exercise, caffeine, device use)
+            """)
+        
         st.stop()
     
     with st.spinner("📥 Loading data from Google Sheet..."):
         df = load_from_url(csv_url.strip())
+        
 else:
-    uploaded = st.sidebar.file_uploader("📤 Upload your CSV file", type=["csv"])
+    uploaded = st.sidebar.file_uploader(
+        "Upload CSV File",
+        type=["csv"],
+        help="Upload your sleep study data"
+    )
     
     if uploaded is None:
-        st.markdown("""
-        <div class="recommendation-card">
-            <h3>👋 Welcome to the UMK Sleep Dashboard!</h3>
-            <p>Please upload your CSV file using the sidebar to begin your analysis.</p>
-            <br>
-            <p><strong>Your CSV should contain:</strong></p>
-            <ul>
-                <li>Sleep quality measurements</li>
-                <li>Academic performance data</li>
-                <li>Student demographic information</li>
-                <li>Lifestyle factors (exercise, caffeine, etc.)</li>
-            </ul>
-        </div>
-        """, unsafe_allow_html=True)
+        st.markdown("# 🌙 UMK Insomnia & Educational Outcomes Dashboard")
+        st.markdown("### Multi-page application for sleep quality and academic performance analysis")
+        st.markdown("---")
+        
+        st.info("👈 **Upload your CSV file in the sidebar to begin**")
         st.stop()
     
-    with st.spinner("📥 Processing your CSV file..."):
+    with st.spinner("📥 Processing CSV file..."):
         df = load_from_upload(uploaded)
 
 # Process data
 df = ensure_engineered_columns(df)
 set_dataframe_in_session(df)
 
-# Success message
-st.success(f"✅ Data loaded successfully! **{len(df)}** responses • **{df.shape[1]}** columns analyzed")
+# Main dashboard
+st.markdown("# 🌙 UMK Sleep & Academic Study Dashboard")
+st.markdown("### Research on Sleep Quality and Academic Performance (2024)")
+st.markdown("---")
 
-# Quick stats in columns
+# Objective Statement
+st.markdown("""
+<div class="objective-card">
+    <h2 style='color: #2d3748; margin-top: 0;'>🎯 Research Objective</h2>
+    <p style='color: #4a5568; font-size: 1.05rem; line-height: 1.7; margin-bottom: 0;'>
+        Analyze the <strong>relationship between sleep quality and academic performance</strong> among UMK students 
+        to identify correlations between insomnia severity, sleep patterns, lifestyle factors, and educational outcomes.
+    </p>
+</div>
+""", unsafe_allow_html=True)
+
+# Summary Statistics
+st.markdown("## 📊 Summary Statistics")
+
 col1, col2, col3, col4 = st.columns(4)
 
 with col1:
     st.markdown("""
-    <div style='background: rgba(255,255,255,0.95); padding: 1.5rem; border-radius: 15px; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.15);'>
-        <h2 style='color: #667eea; margin: 0; text-shadow: none;'>📊</h2>
-        <p style='color: #2d3748; font-size: 2rem; font-weight: bold; margin: 0.5rem 0; text-shadow: none;'>{}</p>
-        <p style='color: #718096; margin: 0; text-shadow: none;'>Total Responses</p>
+    <div class="summary-box">
+        <div class="icon-badge">📝</div>
+        <div style='font-size: 2.5rem; font-weight: 700; color: #2d3748; margin: 0.5rem 0;'>{}</div>
+        <div style='font-size: 0.875rem; color: #718096; font-weight: 500;'>Total Responses</div>
     </div>
     """.format(len(df)), unsafe_allow_html=True)
 
 with col2:
     if "InsomniaSeverity_index" in df.columns:
-        avg_insomnia = df['InsomniaSeverity_index'].mean()
+        avg_val = df['InsomniaSeverity_index'].mean()
         st.markdown("""
-        <div style='background: rgba(255,255,255,0.95); padding: 1.5rem; border-radius: 15px; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.15);'>
-            <h2 style='color: #764ba2; margin: 0; text-shadow: none;'>😴</h2>
-            <p style='color: #2d3748; font-size: 2rem; font-weight: bold; margin: 0.5rem 0; text-shadow: none;'>{:.2f}</p>
-            <p style='color: #718096; margin: 0; text-shadow: none;'>Avg Insomnia Severity</p>
+        <div class="summary-box">
+            <div class="icon-badge">😴</div>
+            <div style='font-size: 2.5rem; font-weight: 700; color: #2d3748; margin: 0.5rem 0;'>{:.2f}</div>
+            <div style='font-size: 0.875rem; color: #718096; font-weight: 500;'>Avg Insomnia Severity</div>
+            <div style='font-size: 0.75rem; color: #a0aec0; margin-top: 0.25rem;'>(Scale: 0-4)</div>
         </div>
-        """.format(avg_insomnia), unsafe_allow_html=True)
+        """.format(avg_val), unsafe_allow_html=True)
 
 with col3:
     if "AcademicImpact_index" in df.columns:
-        avg_impact = df['AcademicImpact_index'].mean()
+        avg_val = df['AcademicImpact_index'].mean()
         st.markdown("""
-        <div style='background: rgba(255,255,255,0.95); padding: 1.5rem; border-radius: 15px; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.15);'>
-            <h2 style='color: #667eea; margin: 0; text-shadow: none;'>🎓</h2>
-            <p style='color: #2d3748; font-size: 2rem; font-weight: bold; margin: 0.5rem 0; text-shadow: none;'>{:.2f}</p>
-            <p style='color: #718096; margin: 0; text-shadow: none;'>Avg Academic Impact</p>
+        <div class="summary-box">
+            <div class="icon-badge">🎓</div>
+            <div style='font-size: 2.5rem; font-weight: 700; color: #2d3748; margin: 0.5rem 0;'>{:.2f}</div>
+            <div style='font-size: 0.875rem; color: #718096; font-weight: 500;'>Avg Academic Impact</div>
+            <div style='font-size: 0.75rem; color: #a0aec0; margin-top: 0.25rem;'>(Scale: 0-4)</div>
         </div>
-        """.format(avg_impact), unsafe_allow_html=True)
+        """.format(avg_val), unsafe_allow_html=True)
 
 with col4:
     if "SleepHours_est" in df.columns:
-        avg_sleep = df['SleepHours_est'].mean()
+        avg_val = df['SleepHours_est'].mean()
         st.markdown("""
-        <div style='background: rgba(255,255,255,0.95); padding: 1.5rem; border-radius: 15px; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.15);'>
-            <h2 style='color: #764ba2; margin: 0; text-shadow: none;'>⏰</h2>
-            <p style='color: #2d3748; font-size: 2rem; font-weight: bold; margin: 0.5rem 0; text-shadow: none;'>{:.1f}h</p>
-            <p style='color: #718096; margin: 0; text-shadow: none;'>Avg Sleep Duration</p>
+        <div class="summary-box">
+            <div class="icon-badge">⏰</div>
+            <div style='font-size: 2.5rem; font-weight: 700; color: #2d3748; margin: 0.5rem 0;'>{:.1f}h</div>
+            <div style='font-size: 0.875rem; color: #718096; font-weight: 500;'>Avg Sleep Duration</div>
+            <div style='font-size: 0.75rem; color: #a0aec0; margin-top: 0.25rem;'>Per night</div>
         </div>
-        """.format(avg_sleep), unsafe_allow_html=True)
+        """.format(avg_val), unsafe_allow_html=True)
 
 st.markdown("<br>", unsafe_allow_html=True)
 
+# Additional metrics
+col5, col6, col7 = st.columns(3)
+
+with col5:
+    if "SleepQuality_score" in df.columns:
+        avg_val = df['SleepQuality_score'].mean()
+        st.metric(
+            label="⭐ Average Sleep Quality",
+            value=f"{avg_val:.2f} / 5",
+            delta=None
+        )
+
+with col6:
+    if "Stress_score" in df.columns:
+        avg_val = df['Stress_score'].mean()
+        st.metric(
+            label="😰 Average Stress Level",
+            value=f"{avg_val:.2f} / 4",
+            delta=None
+        )
+
+with col7:
+    if "AcademicPerformance_score" in df.columns:
+        avg_val = df['AcademicPerformance_score'].mean()
+        st.metric(
+            label="📚 Average Academic Performance",
+            value=f"{avg_val:.2f} / 5",
+            delta=None
+        )
+
+st.markdown("---")
+
 # Navigation guide
-st.markdown("""
-<div class="recommendation-card">
-    <h3>🧭 Navigation Guide</h3>
-    <p>Use the page navigation in the left sidebar to explore different sections:</p>
-    <br>
-    <ul>
-        <li><strong>🏠 Home</strong> - Overview and dataset summary with key metrics</li>
-        <li><strong>📈 Insomnia Visualisation</strong> - Five comprehensive scientific visualizations</li>
-        <li><strong>👥 Subgroup Comparison</strong> - Compare different student groups (faculty, year, age)</li>
-    </ul>
-</div>
-""", unsafe_allow_html=True)
+st.markdown("## 🧭 Navigation")
+st.markdown("Use the sidebar menu to explore different analysis sections:")
+
+nav_col1, nav_col2, nav_col3 = st.columns(3)
+
+with nav_col1:
+    st.markdown("""
+    <div class="metric-card">
+        <h3 style='color: #2d3748; margin-top: 0;'>🏠 Home</h3>
+        <p style='color: #718096; margin-bottom: 0;'>Overview and dataset summary with detailed metrics and statistics</p>
+    </div>
+    """, unsafe_allow_html=True)
+
+with nav_col2:
+    st.markdown("""
+    <div class="metric-card">
+        <h3 style='color: #2d3748; margin-top: 0;'>📈 Insomnia Visualisation</h3>
+        <p style='color: #718096; margin-bottom: 0;'>Five comprehensive scientific visualizations and analysis</p>
+    </div>
+    """, unsafe_allow_html=True)
+
+with nav_col3:
+    st.markdown("""
+    <div class="metric-card">
+        <h3 style='color: #2d3748; margin-top: 0;'>👥 Subgroup Comparison</h3>
+        <p style='color: #718096; margin-bottom: 0;'>Compare metrics across different student demographics</p>
+    </div>
+    """, unsafe_allow_html=True)
+
+# Data status
+st.markdown("---")
+st.success(f"✅ **Data successfully loaded and processed** • {len(df)} responses • {df.shape[1]} columns • Auto-refresh enabled")
+
+# Footer info
+with st.expander("ℹ️ About this Dashboard"):
+    st.markdown("""
+    **UMK Insomnia & Educational Outcomes Dashboard**
+    
+    This dashboard provides comprehensive analysis of sleep quality and its impact on academic performance among 
+    Universiti Malaysia Kelantan students. The data is automatically updated from Google Sheets.
+    
+    **Features:**
+    - Real-time data synchronization
+    - Interactive visualizations
+    - Statistical analysis
+    - Demographic comparisons
+    - Correlation analysis
+    """)
