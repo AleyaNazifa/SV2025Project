@@ -5,6 +5,7 @@ from data_loader import (
     ensure_engineered_columns,
     set_dataframe_in_session,
 )
+from styles import apply_global_styles
 
 # ===== CONFIGURATION =====
 DEFAULT_GOOGLE_SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSf4umx6QNDel99If8P2otizAHj7jEDxFIsqandbD0zYVzfDheZo2YVkK1_zknpDKjHnBuYWCINgcCe/pub?output=csv"
@@ -15,6 +16,10 @@ st.set_page_config(
     page_icon="🌙",
     initial_sidebar_state="expanded"
 )
+
+# Apply to ALL pages via session state
+if 'styles_loaded' not in st.session_state:
+    st.session_state.styles_loaded = True
 
 # Modern Professional Styling
 st.markdown("""
