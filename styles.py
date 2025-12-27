@@ -1,3 +1,8 @@
+"""
+Global styling module for UMK Sleep Study Dashboard
+Import this in every page to maintain consistent styling
+"""
+
 import streamlit as st
 
 def apply_global_styles():
@@ -6,17 +11,17 @@ def apply_global_styles():
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
         
-        /* Global font */
-        * { 
+        /* ========== GLOBAL FONT ========== */
+        html, body, [class*="css"], * { 
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
         }
         
-        /* Main app background */
+        /* ========== MAIN APP BACKGROUND ========== */
         .stApp {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
         }
         
-        /* Main content container */
+        /* ========== MAIN CONTENT CONTAINER ========== */
         .main .block-container {
             background-color: #ffffff !important;
             border-radius: 20px !important;
@@ -26,7 +31,7 @@ def apply_global_styles():
             max-width: 1400px !important;
         }
         
-        /* ========== SIDEBAR STYLING ========== */
+        /* ========== SIDEBAR BACKGROUND ========== */
         section[data-testid="stSidebar"] {
             background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%) !important;
         }
@@ -36,17 +41,17 @@ def apply_global_styles():
             padding-top: 2rem !important;
         }
         
-        /* Sidebar ALL text white */
-        section[data-testid="stSidebar"],
-        section[data-testid="stSidebar"] *,
+        /* ========== SIDEBAR TEXT COLORS ========== */
         section[data-testid="stSidebar"] h1,
         section[data-testid="stSidebar"] h2,
         section[data-testid="stSidebar"] h3,
+        section[data-testid="stSidebar"] h4,
         section[data-testid="stSidebar"] label,
         section[data-testid="stSidebar"] .stMarkdown,
         section[data-testid="stSidebar"] p,
         section[data-testid="stSidebar"] span,
-        section[data-testid="stSidebar"] div {
+        section[data-testid="stSidebar"] div,
+        section[data-testid="stSidebar"] li {
             color: #f1f5f9 !important;
         }
         
@@ -63,7 +68,7 @@ def apply_global_styles():
             letter-spacing: 0.05em !important;
         }
         
-        /* Multiselect styling */
+        /* ========== MULTISELECT STYLING ========== */
         section[data-testid="stSidebar"] .stMultiSelect {
             margin-bottom: 1.5rem !important;
         }
@@ -75,7 +80,7 @@ def apply_global_styles():
             margin-bottom: 0.5rem !important;
         }
         
-        /* Multiselect container */
+        /* Multiselect container background */
         section[data-testid="stSidebar"] [data-baseweb="select"] {
             background-color: #0f172a !important;
             border: 1px solid #475569 !important;
@@ -86,19 +91,23 @@ def apply_global_styles():
             border-color: #64748b !important;
         }
         
-        /* Multiselect input */
-        section[data-testid="stSidebar"] input {
+        /* Multiselect input text */
+        section[data-testid="stSidebar"] [data-baseweb="select"] input {
             color: #f1f5f9 !important;
-            background-color: #0f172a !important;
         }
         
-        /* Selected items (pills) - BLUE GRADIENT */
+        /* Multiselect placeholder */
+        section[data-testid="stSidebar"] [data-baseweb="select"] [class*="placeholder"] {
+            color: #94a3b8 !important;
+        }
+        
+        /* ========== SELECTED PILLS (BLUE GRADIENT) ========== */
         section[data-testid="stSidebar"] [data-baseweb="tag"] {
             background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important;
             border: none !important;
             border-radius: 6px !important;
             padding: 0.35rem 0.85rem !important;
-            margin: 0.25rem !important;
+            margin: 0.25rem 0.25rem 0.25rem 0 !important;
             font-size: 0.813rem !important;
             font-weight: 500 !important;
         }
@@ -112,7 +121,11 @@ def apply_global_styles():
             fill: #ffffff !important;
         }
         
-        /* Dropdown menu */
+        section[data-testid="stSidebar"] [data-baseweb="tag"]:hover {
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%) !important;
+        }
+        
+        /* ========== DROPDOWN MENU ========== */
         [data-baseweb="popover"] {
             background-color: #1e293b !important;
         }
@@ -139,7 +152,7 @@ def apply_global_styles():
             border-color: #64748b !important;
         }
         
-        /* Info/Alert boxes in sidebar */
+        /* ========== SIDEBAR ALERTS/INFO BOXES ========== */
         section[data-testid="stSidebar"] .stAlert,
         section[data-testid="stSidebar"] [data-testid="stAlert"] {
             background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%) !important;
@@ -154,7 +167,7 @@ def apply_global_styles():
             color: #dbeafe !important;
         }
         
-        /* Radio buttons in sidebar */
+        /* ========== SIDEBAR RADIO BUTTONS ========== */
         section[data-testid="stSidebar"] .stRadio > div {
             background-color: #1e293b !important;
             padding: 0.75rem !important;
@@ -166,7 +179,7 @@ def apply_global_styles():
             color: #f1f5f9 !important;
         }
         
-        /* Buttons in sidebar */
+        /* ========== SIDEBAR BUTTONS ========== */
         section[data-testid="stSidebar"] .stButton > button {
             background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important;
             color: white !important;
@@ -184,7 +197,7 @@ def apply_global_styles():
             box-shadow: 0 5px 15px rgba(59, 130, 246, 0.4) !important;
         }
         
-        /* File uploader in sidebar */
+        /* ========== SIDEBAR FILE UPLOADER ========== */
         section[data-testid="stSidebar"] [data-testid="stFileUploader"] {
             background-color: #1e293b !important;
             border: 1px solid #334155 !important;
@@ -192,11 +205,28 @@ def apply_global_styles():
             padding: 1rem !important;
         }
         
-        /* ========== MAIN CONTENT STYLING ========== */
+        section[data-testid="stSidebar"] [data-testid="stFileUploader"] label {
+            color: #f1f5f9 !important;
+        }
+        
+        /* ========== SIDEBAR EXPANDER ========== */
+        section[data-testid="stSidebar"] .streamlit-expanderHeader {
+            background-color: #1e293b !important;
+            border-radius: 8px !important;
+            color: #f1f5f9 !important;
+        }
+        
+        section[data-testid="stSidebar"] .streamlit-expanderContent {
+            background-color: #1e293b !important;
+            border-color: #334155 !important;
+        }
+        
+        /* ========== MAIN CONTENT HEADINGS ========== */
         h1 {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
             -webkit-background-clip: text !important;
             -webkit-text-fill-color: transparent !important;
+            background-clip: text !important;
             font-weight: 800 !important;
             font-size: 2.5rem !important;
             margin-bottom: 0.5rem !important;
@@ -216,7 +246,7 @@ def apply_global_styles():
             font-size: 1.25rem !important;
         }
         
-        /* Metrics */
+        /* ========== METRICS ========== */
         [data-testid="stMetric"] {
             background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%) !important;
             padding: 1.5rem !important;
@@ -231,9 +261,15 @@ def apply_global_styles():
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
             -webkit-background-clip: text !important;
             -webkit-text-fill-color: transparent !important;
+            background-clip: text !important;
         }
         
-        /* Insight boxes */
+        [data-testid="stMetricLabel"] {
+            color: #64748b !important;
+            font-weight: 600 !important;
+        }
+        
+        /* ========== CUSTOM BOXES ========== */
         .insight-box {
             background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%) !important;
             border-left: 4px solid #3b82f6 !important;
@@ -254,7 +290,6 @@ def apply_global_styles():
             margin: 0 !important;
         }
         
-        /* Objective card */
         .objective-card {
             background: linear-gradient(135deg, #eef2ff 0%, #e0e7ff 100%) !important;
             border-left: 5px solid #667eea !important;
@@ -264,7 +299,6 @@ def apply_global_styles():
             box-shadow: 0 4px 6px rgba(102, 126, 234, 0.1) !important;
         }
         
-        /* Stat boxes */
         .stat-box {
             background: white !important;
             border-radius: 15px !important;
@@ -292,6 +326,7 @@ def apply_global_styles():
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
             -webkit-background-clip: text !important;
             -webkit-text-fill-color: transparent !important;
+            background-clip: text !important;
         }
         
         .stat-label {
@@ -303,14 +338,14 @@ def apply_global_styles():
             margin-top: 0.5rem !important;
         }
         
-        /* Dividers */
+        /* ========== DIVIDERS ========== */
         hr {
             border: none !important;
             border-top: 2px solid #e5e7eb !important;
             margin: 2.5rem 0 !important;
         }
         
-        /* Success/Info/Warning boxes */
+        /* ========== ALERTS ========== */
         .stSuccess {
             background-color: #d1fae5 !important;
             border-left: 4px solid #10b981 !important;
@@ -330,6 +365,30 @@ def apply_global_styles():
             border-left: 4px solid #f59e0b !important;
             color: #92400e !important;
             border-radius: 8px !important;
+        }
+        
+        .stError {
+            background-color: #fee2e2 !important;
+            border-left: 4px solid #ef4444 !important;
+            color: #991b1b !important;
+            border-radius: 8px !important;
+        }
+        
+        /* ========== DATAFRAME ========== */
+        [data-testid="stDataFrame"] {
+            border-radius: 10px !important;
+            overflow: hidden !important;
+        }
+        
+        /* ========== EXPANDER ========== */
+        .streamlit-expanderHeader {
+            background-color: #f8fafc !important;
+            border-radius: 8px !important;
+            font-weight: 600 !important;
+        }
+        
+        .streamlit-expanderHeader:hover {
+            background-color: #f1f5f9 !important;
         }
     </style>
     """, unsafe_allow_html=True)
