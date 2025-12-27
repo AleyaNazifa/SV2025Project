@@ -222,7 +222,7 @@ def apply_global_styles():
         }
         
         /* ========== MAIN CONTENT HEADINGS ========== */
-        h1 {
+        .main h1 {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
             -webkit-background-clip: text !important;
             -webkit-text-fill-color: transparent !important;
@@ -232,7 +232,7 @@ def apply_global_styles():
             margin-bottom: 0.5rem !important;
         }
         
-        h2 {
+        .main h2 {
             color: #1e293b !important;
             font-weight: 700 !important;
             font-size: 1.75rem !important;
@@ -240,10 +240,18 @@ def apply_global_styles():
             margin-bottom: 1rem !important;
         }
         
-        h3 {
+        .main h3 {
             color: #334155 !important;
             font-weight: 600 !important;
             font-size: 1.25rem !important;
+        }
+        
+        .main p {
+            color: #1e293b !important;
+        }
+        
+        .main div {
+            color: #1e293b !important;
         }
         
         /* ========== METRICS ========== */
