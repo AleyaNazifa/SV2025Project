@@ -31,6 +31,18 @@ def apply_global_styles():
             max-width: 1400px !important;
         }
         
+        /* Force all text in main to be dark */
+        .main * {
+            color: #1e293b !important;
+        }
+        
+        /* Override for specific elements */
+        .main [data-testid="stMarkdownContainer"] p,
+        .main [data-testid="stMarkdownContainer"] li,
+        .main [data-testid="stMarkdownContainer"] span {
+            color: #1e293b !important;
+        }
+        
         /* ========== SIDEBAR BACKGROUND ========== */
         section[data-testid="stSidebar"] {
             background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%) !important;
@@ -232,26 +244,30 @@ def apply_global_styles():
             margin-bottom: 0.5rem !important;
         }
         
-        .main h2 {
+        .main h2, .main h3, .main h4 {
             color: #1e293b !important;
             font-weight: 700 !important;
+        }
+        
+        .main h2 {
             font-size: 1.75rem !important;
             margin-top: 2.5rem !important;
             margin-bottom: 1rem !important;
         }
         
         .main h3 {
-            color: #334155 !important;
-            font-weight: 600 !important;
             font-size: 1.25rem !important;
+            font-weight: 600 !important;
         }
         
-        .main p {
+        /* Force paragraph and text visibility */
+        .main p, .main span, .main div, .main li {
             color: #1e293b !important;
         }
         
-        .main div {
-            color: #1e293b !important;
+        .main strong {
+            color: #0f172a !important;
+            font-weight: 700 !important;
         }
         
         /* ========== METRICS ========== */
