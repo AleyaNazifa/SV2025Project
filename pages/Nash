@@ -280,13 +280,13 @@ if df is not None:
     col1, col2, col3 = st.columns(3)
     with col1:
         if st.button("⬅️ View Member 2", use_container_width=True):
-            st.switch_page("pages/2_👤_Member_2_Analysis.py")
+            st.switch_page("pages/AleyaNazifa.py")
     with col2:
         if st.button("🏠 Back to Home", use_container_width=True):
             st.switch_page("app.py")
     with col3:
         if st.button("⬅️ View Member 1", use_container_width=True):
-            st.switch_page("pages/1_👤_Member_1_Analysis.py")
+            st.switch_page("pages/AleyaAelyana.py")
 
 else:
     st.error("Unable to load data.")
