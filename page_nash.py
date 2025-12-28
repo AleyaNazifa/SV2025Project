@@ -8,4 +8,3 @@ def render():
         st.stop()
     st.write("Put 5 visualizations here.")
     st.dataframe(df.head(10), use_container_width=True)
-
