@@ -299,7 +299,7 @@ if df is not None:
             st.switch_page("app.py")
     with col3:
         if st.button("➡️ View Member 3", use_container_width=True):
-            st.switch_page("pages/3_👤_Member_3_Analysis.py")
+            st.switch_page("pages/Nash.py")
 
 else:
     st.error("Unable to load data.")
