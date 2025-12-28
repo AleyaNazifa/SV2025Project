@@ -12,29 +12,74 @@ st.set_page_config(
     layout="wide"
 )
 
-# Custom CSS - Professional styling
+# Professional CSS with better fonts
 st.markdown("""
     <style>
-    [data-testid="stSidebar"] {
-        background: linear-gradient(180deg, #4c1d95 0%, #5b21b6 50%, #6d28d9 100%);
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
+    
+    * {
+        font-family: 'Inter', sans-serif;
     }
+    
+    [data-testid="stSidebar"] {
+        background: linear-gradient(180deg, #1e293b 0%, #334155 100%);
+    }
+    
     [data-testid="stSidebar"] * {
         color: white !important;
+        font-weight: 500 !important;
     }
+    
     h1 {
-        color: #4c1d95;
-        font-weight: 800;
-        padding-bottom: 1rem;
-        border-bottom: 4px solid #8b5cf6;
+        color: #0f172a !important;
+        font-weight: 800 !important;
+        font-size: 2.5rem !important;
+        margin-bottom: 0.5rem !important;
     }
+    
     h2 {
-        color: #5b21b6;
-        font-weight: 700;
+        color: #1e293b !important;
+        font-weight: 700 !important;
+        font-size: 1.75rem !important;
+        margin-top: 2rem !important;
     }
+    
+    h3 {
+        color: #334155 !important;
+        font-weight: 600 !important;
+    }
+    
+    p, div, span, label {
+        color: #475569 !important;
+        font-size: 1rem !important;
+    }
+    
+    .stMetricLabel {
+        color: #64748b !important;
+        font-weight: 600 !important;
+        font-size: 0.9rem !important;
+    }
+    
+    .stMetricValue {
+        color: #0f172a !important;
+        font-weight: 700 !important;
+        font-size: 2rem !important;
+    }
+    
     .stButton>button {
-        background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%);
-        color: white;
-        font-weight: 600;
+        background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+        color: white !important;
+        font-weight: 600 !important;
+        border: none;
+        padding: 0.75rem 2rem;
+        border-radius: 0.5rem;
+        font-size: 1rem !important;
+    }
+    
+    .stButton>button:hover {
+        background: linear-gradient(135deg, #334155 0%, #475569 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
     }
     </style>
 """, unsafe_allow_html=True)
@@ -42,7 +87,6 @@ st.markdown("""
 # Google Sheets CSV URL
 CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSf4umx6QNDel99If8P2otizAHj7jEDxFIsqandbD0zYVzfDheZo2YVkK1_zknpDKjHnBuYWCINgcCe/pub?output=csv"
 
-# Load data
 @st.cache_data(ttl=300)
 def load_data():
     try:
@@ -58,9 +102,9 @@ def get_malaysian_time():
 
 df = load_data()
 
-# Sidebar navigation
+# Sidebar
 with st.sidebar:
-    st.markdown("### 🧭 Quick Navigation")
+    st.markdown("### 🧭 Navigation")
     col1, col2 = st.columns(2)
     with col1:
         if st.button("🏠 Home", use_container_width=True):
@@ -76,13 +120,12 @@ with st.sidebar:
 
 # Page Header
 st.title("👤 Member 1: Demographic & Sleep Pattern Analysis")
-st.markdown("### 🔍 Exploring Sleep Behaviors Among UMK Students")
+st.markdown("### Exploring Sleep Behaviors Among UMK Students")
 st.markdown("---")
 
 if df is not None:
-    # Visualization 1: Gender Distribution
+    # Visualization 1
     st.markdown("## 📊 Visualization 1: Gender Distribution")
-    st.markdown("*Understanding the demographic composition of survey respondents*")
     
     gender_counts = df['What is your gender?'].value_counts()
     
@@ -93,11 +136,20 @@ if df is not None:
             values=gender_counts.values, 
             names=gender_counts.index,
             title="Survey Respondents by Gender",
-            color_discrete_sequence=['#8b5cf6', '#a78bfa', '#c4b5fd'],
-            hole=0.4
+            color_discrete_sequence=['#0f172a', '#334155', '#64748b']
         )
-        fig1.update_traces(textposition='inside', textinfo='percent+label', textfont_size=14)
-        fig1.update_layout(height=500, showlegend=True, font=dict(size=12))
+        fig1.update_traces(
+            textposition='inside', 
+            textinfo='percent+label',
+            textfont_size=16,
+            marker=dict(line=dict(color='white', width=3))
+        )
+        fig1.update_layout(
+            height=500,
+            font=dict(size=14, color='#0f172a', family='Inter'),
+            title_font=dict(size=20, color='#0f172a', family='Inter'),
+            showlegend=True
+        )
         st.plotly_chart(fig1, use_container_width=True)
     
     with col2:
@@ -106,51 +158,48 @@ if df is not None:
             percentage = (count / len(df)) * 100
             st.metric(gender, f"{count}", f"{percentage:.1f}%")
     
-    with st.expander("💡 Key Insights - Gender Distribution"):
-        st.write(f"""
-        - **Total respondents**: {len(df)} students
-        - Gender breakdown provides demographic context for sleep pattern analysis
-        - Helps identify if sleep issues vary by gender demographics
-        - Essential baseline for cross-sectional analysis
-        """)
-    
     st.markdown("---")
     
-    # Visualization 2: Age Group Distribution
+    # Visualization 2
     st.markdown("## 📊 Visualization 2: Age Group Distribution")
-    st.markdown("*Age demographics of survey participants*")
+    
+    age_counts = df['What is your age group?'].value_counts().sort_index()
     
     col1, col2 = st.columns([2, 1])
     
     with col1:
-        age_counts = df['What is your age group?'].value_counts().sort_index()
         fig2 = px.bar(
             x=age_counts.index, 
             y=age_counts.values,
             title="Distribution by Age Group",
-            color=age_counts.values,
-            color_continuous_scale='Purples',
             labels={'x': 'Age Group', 'y': 'Number of Students'}
         )
-        fig2.update_layout(height=450, showlegend=False)
-        fig2.update_traces(texttemplate='%{y}', textposition='outside')
+        fig2.update_traces(
+            marker_color='#0f172a',
+            marker_line_color='white',
+            marker_line_width=2,
+            texttemplate='%{y}',
+            textposition='outside',
+            textfont=dict(size=16, color='#0f172a')
+        )
+        fig2.update_layout(
+            height=450,
+            font=dict(size=14, color='#0f172a', family='Inter'),
+            title_font=dict(size=20, color='#0f172a', family='Inter'),
+            plot_bgcolor='rgba(0,0,0,0)',
+            paper_bgcolor='rgba(0,0,0,0)'
+        )
         st.plotly_chart(fig2, use_container_width=True)
     
     with col2:
-        st.metric("📊 Most Common Age", age_counts.idxmax())
-        st.metric("🔢 Age Groups", len(age_counts))
-        st.metric("👥 Total Students", len(df))
-        
-        with st.expander("📈 Detailed Breakdown"):
-            for age, count in age_counts.items():
-                percentage = (count / len(df)) * 100
-                st.write(f"**{age}**: {count} ({percentage:.1f}%)")
+        st.metric("Most Common Age", age_counts.idxmax())
+        st.metric("Age Groups", len(age_counts))
+        st.metric("Total Students", len(df))
     
     st.markdown("---")
     
-    # Visualization 3: Sleep Hours Distribution
-    st.markdown("## 📊 Visualization 3: Daily Sleep Duration Analysis")
-    st.markdown("*Average hours of sleep students get per day*")
+    # Visualization 3
+    st.markdown("## 📊 Visualization 3: Daily Sleep Duration")
     
     sleep_counts = df['On average, how many hours of sleep do you get on a typical day? '].value_counts().sort_index()
     
@@ -158,33 +207,37 @@ if df is not None:
         x=sleep_counts.index, 
         y=sleep_counts.values,
         title="Average Sleep Duration Distribution",
-        color=sleep_counts.values,
-        color_continuous_scale='Teal',
         labels={'x': 'Sleep Hours', 'y': 'Number of Students'}
     )
-    fig3.update_layout(height=500)
-    fig3.update_traces(texttemplate='%{y}', textposition='outside')
+    fig3.update_traces(
+        marker_color='#1e293b',
+        marker_line_color='white',
+        marker_line_width=2,
+        texttemplate='%{y}',
+        textposition='outside',
+        textfont=dict(size=16, color='#0f172a')
+    )
+    fig3.update_layout(
+        height=500,
+        font=dict(size=14, color='#0f172a', family='Inter'),
+        title_font=dict(size=20, color='#0f172a', family='Inter'),
+        plot_bgcolor='rgba(0,0,0,0)',
+        paper_bgcolor='rgba(0,0,0,0)'
+    )
     st.plotly_chart(fig3, use_container_width=True)
     
-    col1, col2, col3, col4 = st.columns(4)
+    col1, col2, col3 = st.columns(3)
     with col1:
-        most_common_sleep = sleep_counts.idxmax()
-        st.metric("😴 Most Common", most_common_sleep, "hours")
+        st.metric("Most Common", sleep_counts.idxmax())
     with col2:
-        total_responses = sleep_counts.sum()
-        st.metric("📝 Responses", total_responses)
+        st.metric("Total Responses", sleep_counts.sum())
     with col3:
-        sleep_categories = len(sleep_counts)
-        st.metric("📊 Categories", sleep_categories)
-    with col4:
-        avg_sleep = (sleep_counts.index.astype(str).str.extract('(\d+)')[0].astype(float) * sleep_counts).sum() / sleep_counts.sum()
-        st.metric("⏱️ Average", f"{avg_sleep:.1f}h")
+        st.metric("Sleep Categories", len(sleep_counts))
     
     st.markdown("---")
     
-    # Visualization 4: Insomnia Frequency
-    st.markdown("## 📊 Visualization 4: Difficulty Falling Asleep Patterns")
-    st.markdown("*Frequency of insomnia symptoms among students*")
+    # Visualization 4
+    st.markdown("## 📊 Visualization 4: Difficulty Falling Asleep")
     
     col1, col2 = st.columns([3, 2])
     
@@ -193,91 +246,79 @@ if df is not None:
         fig4 = px.pie(
             values=insomnia_counts.values, 
             names=insomnia_counts.index,
-            title="Difficulty Falling Asleep Frequency",
-            color_discrete_sequence=px.colors.qualitative.Set3
+            title="Difficulty Falling Asleep Frequency"
         )
-        fig4.update_traces(textposition='auto', textinfo='percent+label', textfont_size=12)
-        fig4.update_layout(height=500)
+        fig4.update_traces(
+            textposition='auto',
+            textinfo='percent+label',
+            textfont=dict(size=14, color='white'),
+            marker=dict(
+                colors=['#0f172a', '#1e293b', '#334155', '#475569', '#64748b'],
+                line=dict(color='white', width=3)
+            )
+        )
+        fig4.update_layout(
+            height=500,
+            font=dict(size=14, color='#0f172a', family='Inter'),
+            title_font=dict(size=20, color='#0f172a', family='Inter')
+        )
         st.plotly_chart(fig4, use_container_width=True)
     
     with col2:
-        st.markdown("### 📊 Detailed Breakdown")
-        st.markdown("---")
+        st.markdown("### 📊 Breakdown")
         for category, count in insomnia_counts.items():
             percentage = (count / len(df)) * 100
-            
-            if "Always" in category or "Often" in category:
-                st.error(f"**{category}**\n\n{count} students ({percentage:.1f}%)")
-            elif "Sometimes" in category:
-                st.warning(f"**{category}**\n\n{count} students ({percentage:.1f}%)")
-            else:
-                st.success(f"**{category}**\n\n{count} students ({percentage:.1f}%)")
+            st.metric(category, f"{count}", f"{percentage:.1f}%")
     
     st.markdown("---")
     
-    # Visualization 5: Sleep Quality Rating
-    st.markdown("## 📊 Visualization 5: Overall Sleep Quality Ratings")
-    st.markdown("*How students rate their sleep quality on a scale of 1-5*")
+    # Visualization 5
+    st.markdown("## 📊 Visualization 5: Sleep Quality Ratings")
     
     fig5 = px.histogram(
         df, 
         x='How would you rate the overall quality of your sleep? ',
         title="Overall Sleep Quality Ratings Among UMK Students",
-        color_discrete_sequence=['#8b5cf6'],
-        labels={'How would you rate the overall quality of your sleep? ': 'Sleep Quality Rating (1-5)'}
+        labels={'How would you rate the overall quality of your sleep? ': 'Sleep Quality Rating'}
+    )
+    fig5.update_traces(
+        marker_color='#334155',
+        marker_line_color='white',
+        marker_line_width=2,
+        texttemplate='%{y}',
+        textposition='outside',
+        textfont=dict(size=16, color='#0f172a')
     )
     fig5.update_layout(
+        height=500,
+        font=dict(size=14, color='#0f172a', family='Inter'),
+        title_font=dict(size=20, color='#0f172a', family='Inter'),
         xaxis_title="Sleep Quality Rating (1 = Very Poor, 5 = Excellent)",
         yaxis_title="Number of Students",
-        height=500,
-        bargap=0.15
+        plot_bgcolor='rgba(0,0,0,0)',
+        paper_bgcolor='rgba(0,0,0,0)'
     )
-    fig5.update_traces(texttemplate='%{y}', textposition='outside')
     st.plotly_chart(fig5, use_container_width=True)
     
-    # Summary statistics
-    st.markdown("### 📈 Sleep Quality Statistics")
-    col1, col2, col3, col4 = st.columns(4)
-    
     quality_col = 'How would you rate the overall quality of your sleep? '
+    col1, col2, col3, col4 = st.columns(4)
     
     with col1:
         avg_quality = df[quality_col].mean()
-        st.metric("⭐ Average Rating", f"{avg_quality:.2f}/5", "Overall")
-    
+        st.metric("Average Rating", f"{avg_quality:.2f}/5")
     with col2:
         mode_quality = df[quality_col].mode()[0]
-        st.metric("🎯 Most Common", f"{mode_quality}/5", "Mode")
-    
+        st.metric("Most Common", f"{mode_quality}/5")
     with col3:
         poor_sleep = len(df[df[quality_col] <= 2])
-        poor_pct = (poor_sleep / len(df)) * 100
-        st.metric("😔 Poor Sleep (≤2)", poor_sleep, f"{poor_pct:.1f}%", delta_color="inverse")
-    
+        st.metric("Poor Sleep (≤2)", poor_sleep)
     with col4:
         good_sleep = len(df[df[quality_col] >= 4])
-        good_pct = (good_sleep / len(df)) * 100
-        st.metric("😊 Good Sleep (≥4)", good_sleep, f"{good_pct:.1f}%", delta_color="normal")
+        st.metric("Good Sleep (≥4)", good_sleep)
     
     st.markdown("---")
-    
-    # Summary Section
-    st.markdown("## 📝 Analysis Summary & Key Findings")
-    st.success("""
-    **🔍 Key Findings from Member 1's Analysis:**
-    
-    ✅ **Demographics**: Established clear demographic profile of survey participants  
-    ✅ **Sleep Duration**: Identified typical sleep patterns across student population  
-    ✅ **Insomnia Patterns**: Documented frequency and severity of sleep difficulties  
-    ✅ **Quality Assessment**: Measured subjective sleep quality ratings  
-    ✅ **Correlations**: Revealed relationships between demographics and sleep behaviors  
-    
-    **💡 Implications**: This analysis provides the foundational understanding needed to 
-    assess sleep-related issues and their potential impact on academic performance.
-    """)
     
     # Navigation
-    st.markdown("---")
     col1, col2, col3 = st.columns(3)
     with col1:
         if st.button("⬅️ Back to Home", use_container_width=True):
@@ -290,4 +331,4 @@ if df is not None:
             st.switch_page("pages/3_👤_Member_3_Analysis.py")
 
 else:
-    st.error("Unable to load data. Please check your connection and try refreshing.")
+    st.error("Unable to load data. Please check your connection.")
