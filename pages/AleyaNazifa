@@ -1,0 +1,214 @@
+import streamlit as st
+import pandas as pd
+import plotly.express as px
+import plotly.graph_objects as go
+
+# Page configuration
+st.set_page_config(
+    page_title="Member 1 Analysis",
+    page_icon="👤",
+    layout="wide"
+)
+
+# Custom CSS
+st.markdown("""
+    <style>
+    [data-testid="stSidebar"] {
+        background: linear-gradient(180deg, #1e3a8a 0%, #3b82f6 100%);
+    }
+    h1 {
+        color: #1e3a8a;
+        font-weight: 700;
+        padding-bottom: 1rem;
+        border-bottom: 3px solid #3b82f6;
+    }
+    </style>
+""", unsafe_allow_html=True)
+
+# Google Sheets CSV URL
+CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSf4umx6QNDel99If8P2otizAHj7jEDxFIsqandbD0zYVzfDheZo2YVkK1_zknpDKjHnBuYWCINgcCe/pub?output=csv"
+
+# Load data
+@st.cache_data(ttl=300)
+def load_data():
+    try:
+        df = pd.read_csv(CSV_URL)
+        return df
+    except Exception as e:
+        st.error(f"Error loading data: {e}")
+        return None
+
+df = load_data()
+
+# Page Header
+st.title("👤 Member 1: Demographic & Sleep Pattern Analysis")
+st.markdown("### Exploring Sleep Behaviors Among UMK Students")
+st.markdown("---")
+
+if df is not None:
+    # Visualization 1: Gender Distribution
+    st.markdown("## 📊 Visualization 1: Gender Distribution")
+    st.markdown("*Understanding the demographic composition of survey respondents*")
+    
+    gender_counts = df['What is your gender?'].value_counts()
+    fig1 = px.pie(
+        values=gender_counts.values, 
+        names=gender_counts.index,
+        title="Survey Respondents by Gender",
+        color_discrete_sequence=px.colors.qualitative.Set2,
+        hole=0.4
+    )
+    fig1.update_traces(textposition='inside', textinfo='percent+label')
+    fig1.update_layout(height=500, showlegend=True)
+    st.plotly_chart(fig1, use_container_width=True)
+    
+    with st.expander("💡 Key Insights - Gender Distribution"):
+        st.write(f"""
+        - Total respondents: **{len(df)}** students
+        - Gender breakdown provides demographic context for sleep pattern analysis
+        - Helps identify if sleep issues vary by gender
+        """)
+    
+    st.markdown("---")
+    
+    # Visualization 2: Age Group Distribution
+    st.markdown("## 📊 Visualization 2: Age Group Distribution")
+    st.markdown("*Age demographics of participants*")
+    
+    col1, col2 = st.columns([2, 1])
+    
+    with col1:
+        age_counts = df['What is your age group?'].value_counts().sort_index()
+        fig2 = px.bar(
+            x=age_counts.index, 
+            y=age_counts.values,
+            title="Distribution by Age Group",
+            color=age_counts.values,
+            color_continuous_scale='Blues',
+            labels={'x': 'Age Group', 'y': 'Number of Students'}
+        )
+        fig2.update_layout(height=400, showlegend=False)
+        st.plotly_chart(fig2, use_container_width=True)
+    
+    with col2:
+        st.metric("Most Common Age", age_counts.idxmax())
+        st.metric("Age Groups", len(age_counts))
+        
+        with st.expander("📈 Age Statistics"):
+            for age, count in age_counts.items():
+                percentage = (count / len(df)) * 100
+                st.write(f"**{age}**: {count} ({percentage:.1f}%)")
+    
+    st.markdown("---")
+    
+    # Visualization 3: Sleep Hours Distribution
+    st.markdown("## 📊 Visualization 3: Daily Sleep Duration")
+    st.markdown("*Average hours of sleep students get per day*")
+    
+    sleep_counts = df['On average, how many hours of sleep do you get on a typical day? '].value_counts().sort_index()
+    
+    fig3 = px.bar(
+        x=sleep_counts.index, 
+        y=sleep_counts.values,
+        title="Average Sleep Duration Distribution",
+        color=sleep_counts.values,
+        color_continuous_scale='Greens',
+        labels={'x': 'Sleep Hours', 'y': 'Number of Students'}
+    )
+    fig3.update_layout(height=450)
+    st.plotly_chart(fig3, use_container_width=True)
+    
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        most_common_sleep = sleep_counts.idxmax()
+        st.info(f"**Most Common**: {most_common_sleep}")
+    with col2:
+        total_responses = sleep_counts.sum()
+        st.info(f"**Total Responses**: {total_responses}")
+    with col3:
+        sleep_categories = len(sleep_counts)
+        st.info(f"**Sleep Categories**: {sleep_categories}")
+    
+    st.markdown("---")
+    
+    # Visualization 4: Insomnia Frequency
+    st.markdown("## 📊 Visualization 4: Difficulty Falling Asleep")
+    st.markdown("*Frequency of insomnia symptoms among students*")
+    
+    col1, col2 = st.columns([3, 2])
+    
+    with col1:
+        insomnia_counts = df['How often do you have difficulty falling asleep at night? '].value_counts()
+        fig4 = px.pie(
+            values=insomnia_counts.values, 
+            names=insomnia_counts.index,
+            title="Difficulty Falling Asleep Frequency",
+            color_discrete_sequence=px.colors.qualitative.Pastel
+        )
+        fig4.update_traces(textposition='auto', textinfo='percent+label')
+        fig4.update_layout(height=450)
+        st.plotly_chart(fig4, use_container_width=True)
+    
+    with col2:
+        st.markdown("### 📊 Breakdown")
+        for category, count in insomnia_counts.items():
+            percentage = (count / len(df)) * 100
+            st.metric(category, f"{count} ({percentage:.1f}%)")
+    
+    st.markdown("---")
+    
+    # Visualization 5: Sleep Quality Rating
+    st.markdown("## 📊 Visualization 5: Overall Sleep Quality Ratings")
+    st.markdown("*How students rate their sleep quality on a scale of 1-5*")
+    
+    fig5 = px.histogram(
+        df, 
+        x='How would you rate the overall quality of your sleep? ',
+        title="Overall Sleep Quality Ratings Among UMK Students",
+        color_discrete_sequence=['#ff7f0e'],
+        labels={'How would you rate the overall quality of your sleep? ': 'Sleep Quality Rating (1-5)'}
+    )
+    fig5.update_layout(
+        xaxis_title="Sleep Quality Rating (1 = Poor, 5 = Excellent)",
+        yaxis_title="Number of Students",
+        height=500,
+        bargap=0.1
+    )
+    st.plotly_chart(fig5, use_container_width=True)
+    
+    # Summary statistics
+    col1, col2, col3, col4 = st.columns(4)
+    
+    quality_col = 'How would you rate the overall quality of your sleep? '
+    
+    with col1:
+        avg_quality = df[quality_col].mean()
+        st.metric("Average Rating", f"{avg_quality:.2f}/5")
+    
+    with col2:
+        mode_quality = df[quality_col].mode()[0]
+        st.metric("Most Common", f"{mode_quality}/5")
+    
+    with col3:
+        poor_sleep = len(df[df[quality_col] <= 2])
+        st.metric("Poor Sleep (≤2)", poor_sleep)
+    
+    with col4:
+        good_sleep = len(df[df[quality_col] >= 4])
+        st.metric("Good Sleep (≥4)", good_sleep)
+    
+    st.markdown("---")
+    
+    # Summary Section
+    st.markdown("## 📝 Analysis Summary")
+    st.success("""
+    **Key Findings from Member 1's Analysis:**
+    - Demographic profile of survey participants established
+    - Sleep duration patterns identified across student population  
+    - Insomnia frequency documented with clear distribution
+    - Sleep quality ratings provide baseline for impact assessment
+    - Data reveals relationship between demographics and sleep behaviors
+    """)
+
+else:
+    st.error("Unable to load data. Please check your connection and try refreshing.")
