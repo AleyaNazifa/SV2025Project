@@ -1,0 +1,237 @@
+import streamlit as st
+import pandas as pd
+import plotly.express as px
+import plotly.graph_objects as go
+
+# Page configuration
+st.set_page_config(
+    page_title="Member 2 Analysis",
+    page_icon="👤",
+    layout="wide"
+)
+
+# Custom CSS
+st.markdown("""
+    <style>
+    [data-testid="stSidebar"] {
+        background: linear-gradient(180deg, #1e3a8a 0%, #3b82f6 100%);
+    }
+    h1 {
+        color: #1e3a8a;
+        font-weight: 700;
+        padding-bottom: 1rem;
+        border-bottom: 3px solid #3b82f6;
+    }
+    </style>
+""", unsafe_allow_html=True)
+
+# Google Sheets CSV URL
+CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSf4umx6QNDel99If8P2otizAHj7jEDxFIsqandbD0zYVzfDheZo2YVkK1_zknpDKjHnBuYWCINgcCe/pub?output=csv"
+
+# Load data
+@st.cache_data(ttl=300)
+def load_data():
+    try:
+        df = pd.read_csv(CSV_URL)
+        return df
+    except Exception as e:
+        st.error(f"Error loading data: {e}")
+        return None
+
+df = load_data()
+
+# Page Header
+st.title("👤 Member 2: Academic Performance & Study Impact Analysis")
+st.markdown("### Examining How Sleep Affects Educational Outcomes")
+st.markdown("---")
+
+if df is not None:
+    # Visualization 1: Faculty Distribution
+    st.markdown("## 📊 Visualization 1: Student Distribution by Faculty")
+    st.markdown("*Understanding which faculties are represented in the survey*")
+    
+    faculty_counts = df['Which faculty are you currently enrolled in?'].value_counts()
+    
+    fig1 = px.bar(
+        x=faculty_counts.index, 
+        y=faculty_counts.values,
+        title="Students by Faculty",
+        color=faculty_counts.values,
+        color_continuous_scale='Reds',
+        labels={'x': 'Faculty', 'y': 'Number of Students'}
+    )
+    fig1.update_layout(
+        height=500,
+        xaxis_tickangle=-45,
+        showlegend=False
+    )
+    st.plotly_chart(fig1, use_container_width=True)
+    
+    col1, col2 = st.columns(2)
+    with col1:
+        st.metric("Total Faculties", len(faculty_counts))
+    with col2:
+        st.metric("Largest Faculty", faculty_counts.idxmax())
+    
+    st.markdown("---")
+    
+    # Visualization 2: GPA Distribution
+    st.markdown("## 📊 Visualization 2: GPA Distribution")
+    st.markdown("*Academic performance levels among respondents*")
+    
+    col1, col2 = st.columns([3, 2])
+    
+    with col1:
+        gpa_counts = df['What is your GPA range for the most recent semester?'].value_counts()
+        fig2 = px.pie(
+            values=gpa_counts.values, 
+            names=gpa_counts.index,
+            title="GPA Distribution",
+            color_discrete_sequence=px.colors.qualitative.Set3,
+            hole=0.3
+        )
+        fig2.update_traces(textposition='inside', textinfo='percent+label')
+        fig2.update_layout(height=450)
+        st.plotly_chart(fig2, use_container_width=True)
+    
+    with col2:
+        st.markdown("### 🎓 GPA Breakdown")
+        for gpa, count in gpa_counts.items():
+            percentage = (count / len(df)) * 100
+            st.metric(gpa, f"{count} students ({percentage:.1f}%)")
+    
+    st.markdown("---")
+    
+    # Visualization 3: Concentration Difficulty
+    st.markdown("## 📊 Visualization 3: Concentration During Studies")
+    st.markdown("*How often students struggle to concentrate due to lack of sleep*")
+    
+    conc_counts = df['How often do you experience difficulty concentrating during lectures or studying due to lack of sleep? '].value_counts()
+    
+    # Create ordered categories
+    order = ['Never', 'Rarely', 'Sometimes', 'Often', 'Always (every night)']
+    conc_ordered = conc_counts.reindex([cat for cat in order if cat in conc_counts.index], fill_value=0)
+    
+    fig3 = px.bar(
+        x=conc_ordered.index, 
+        y=conc_ordered.values,
+        title="Difficulty Concentrating Due to Lack of Sleep",
+        color=conc_ordered.values,
+        color_continuous_scale='Purples',
+        labels={'x': 'Frequency', 'y': 'Number of Students'}
+    )
+    fig3.update_layout(height=450, showlegend=False)
+    st.plotly_chart(fig3, use_container_width=True)
+    
+    # Impact indicator
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        never_rarely = conc_counts.get('Never', 0) + conc_counts.get('Rarely', 0)
+        st.success(f"✅ Rarely Affected: {never_rarely}")
+    with col2:
+        sometimes = conc_counts.get('Sometimes', 0)
+        st.warning(f"⚠️ Sometimes: {sometimes}")
+    with col3:
+        often_always = conc_counts.get('Often', 0) + conc_counts.get('Always (every night)', 0)
+        st.error(f"❌ Often Affected: {often_always}")
+    
+    st.markdown("---")
+    
+    # Visualization 4: Daytime Fatigue
+    st.markdown("## 📊 Visualization 4: Daytime Fatigue Impact")
+    st.markdown("*Frequency of fatigue affecting ability to study or attend classes*")
+    
+    col1, col2 = st.columns([2, 3])
+    
+    with col2:
+        fatigue_counts = df['How often do you feel fatigued during the day, affecting your ability to study or attend classes? '].value_counts()
+        fig4 = px.pie(
+            values=fatigue_counts.values, 
+            names=fatigue_counts.index,
+            title="Daily Fatigue Impact on Studies",
+            color_discrete_sequence=px.colors.qualitative.Pastel
+        )
+        fig4.update_traces(textposition='auto', textinfo='percent+label')
+        fig4.update_layout(height=450)
+        st.plotly_chart(fig4, use_container_width=True)
+    
+    with col1:
+        st.markdown("### 😴 Fatigue Levels")
+        st.markdown("---")
+        for category, count in fatigue_counts.items():
+            percentage = (count / len(df)) * 100
+            st.write(f"**{category}**")
+            st.progress(percentage / 100)
+            st.write(f"{count} students ({percentage:.1f}%)")
+            st.write("")
+    
+    st.markdown("---")
+    
+    # Visualization 5: Impact on Assignments
+    st.markdown("## 📊 Visualization 5: Sleep Impact on Assignment Completion")
+    st.markdown("*How insufficient sleep affects ability to complete assignments and meet deadlines*")
+    
+    impact_counts = df['How would you describe the impact of insufficient sleep on your ability to complete assignments and meet deadlines? '].value_counts()
+    
+    # Sort by severity
+    impact_order = ['No impact', 'Minor impact', 'Moderate impact', 'Major impact', 'Severe impact']
+    impact_ordered = impact_counts.reindex([cat for cat in impact_order if cat in impact_counts.index], fill_value=0)
+    
+    fig5 = go.Figure()
+    fig5.add_trace(go.Bar(
+        x=impact_ordered.index,
+        y=impact_ordered.values,
+        marker=dict(
+            color=impact_ordered.values,
+            colorscale='RdYlGn_r',
+            showscale=True,
+            colorbar=dict(title="Students")
+        ),
+        text=impact_ordered.values,
+        textposition='auto'
+    ))
+    
+    fig5.update_layout(
+        title="Sleep's Impact on Meeting Deadlines",
+        xaxis_title="Impact Level",
+        yaxis_title="Number of Students",
+        height=500
+    )
+    st.plotly_chart(fig5, use_container_width=True)
+    
+    # Impact summary
+    st.markdown("### 📊 Impact Summary")
+    col1, col2, col3, col4 = st.columns(4)
+    
+    with col1:
+        no_minor = impact_counts.get('No impact', 0) + impact_counts.get('Minor impact', 0)
+        st.metric("No/Minor Impact", no_minor, delta="Low concern", delta_color="normal")
+    
+    with col2:
+        moderate = impact_counts.get('Moderate impact', 0)
+        st.metric("Moderate Impact", moderate, delta="Medium concern", delta_color="off")
+    
+    with col3:
+        major = impact_counts.get('Major impact', 0)
+        st.metric("Major Impact", major, delta="High concern", delta_color="inverse")
+    
+    with col4:
+        severe = impact_counts.get('Severe impact', 0)
+        st.metric("Severe Impact", severe, delta="Critical", delta_color="inverse")
+    
+    st.markdown("---")
+    
+    # Summary Section
+    st.markdown("## 📝 Analysis Summary")
+    st.info("""
+    **Key Findings from Member 2's Analysis:**
+    - Faculty representation shows diverse academic backgrounds
+    - GPA distribution indicates correlation potential with sleep quality
+    - Concentration difficulties are prevalent among sleep-deprived students
+    - Daytime fatigue significantly impacts academic activities
+    - Assignment completion and deadline management affected by poor sleep
+    - Clear evidence of sleep's impact on academic performance
+    """)
+
+else:
+    st.error("Unable to load data. Please check your connection and try refreshing.")
