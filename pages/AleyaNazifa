@@ -12,37 +12,46 @@ st.set_page_config(
     layout="wide"
 )
 
-# Custom CSS - Professional styling
+# Professional CSS
 st.markdown("""
     <style>
-    [data-testid="stSidebar"] {
-        background: linear-gradient(180deg, #4c1d95 0%, #5b21b6 50%, #6d28d9 100%);
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
+    
+    * {
+        font-family: 'Inter', sans-serif;
     }
+    
+    [data-testid="stSidebar"] {
+        background: linear-gradient(180deg, #1e293b 0%, #334155 100%);
+    }
+    
     [data-testid="stSidebar"] * {
         color: white !important;
+        font-weight: 500 !important;
     }
+    
     h1 {
-        color: #4c1d95;
-        font-weight: 800;
-        padding-bottom: 1rem;
-        border-bottom: 4px solid #8b5cf6;
+        color: #0f172a !important;
+        font-weight: 800 !important;
+        font-size: 2.5rem !important;
     }
+    
     h2 {
-        color: #5b21b6;
-        font-weight: 700;
+        color: #1e293b !important;
+        font-weight: 700 !important;
+        font-size: 1.75rem !important;
     }
+    
     .stButton>button {
-        background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%);
-        color: white;
-        font-weight: 600;
+        background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+        color: white !important;
+        font-weight: 600 !important;
     }
     </style>
 """, unsafe_allow_html=True)
 
-# Google Sheets CSV URL
 CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSf4umx6QNDel99If8P2otizAHj7jEDxFIsqandbD0zYVzfDheZo2YVkK1_zknpDKjHnBuYWCINgcCe/pub?output=csv"
 
-# Load data
 @st.cache_data(ttl=300)
 def load_data():
     try:
@@ -58,9 +67,8 @@ def get_malaysian_time():
 
 df = load_data()
 
-# Sidebar navigation
 with st.sidebar:
-    st.markdown("### 🧭 Quick Navigation")
+    st.markdown("### 🧭 Navigation")
     col1, col2 = st.columns(2)
     with col1:
         if st.button("🏠 Home", use_container_width=True):
@@ -69,20 +77,17 @@ with st.sidebar:
         if st.button("🔄 Refresh", use_container_width=True):
             st.cache_data.clear()
             st.rerun()
-    
     st.markdown("---")
     my_time = get_malaysian_time()
     st.info(f"🕐 {my_time.strftime('%H:%M:%S')} MYT\n📅 {my_time.strftime('%d %B %Y')}")
 
-# Page Header
-st.title("👤 Member 2: Academic Performance & Study Impact Analysis")
-st.markdown("### 📚 Examining How Sleep Affects Educational Outcomes")
+st.title("👤 Member 2: Academic Performance & Study Impact")
+st.markdown("### Examining How Sleep Affects Educational Outcomes")
 st.markdown("---")
 
 if df is not None:
-    # Visualization 1: Faculty Distribution
-    st.markdown("## 📊 Visualization 1: Student Distribution by Faculty")
-    st.markdown("*Understanding which faculties are represented in the survey*")
+    # Visualization 1
+    st.markdown("## 📊 Visualization 1: Faculty Distribution")
     
     faculty_counts = df['Which faculty are you currently enrolled in?'].value_counts()
     
@@ -90,31 +95,37 @@ if df is not None:
         x=faculty_counts.index, 
         y=faculty_counts.values,
         title="Students by Faculty",
-        color=faculty_counts.values,
-        color_continuous_scale='Viridis',
         labels={'x': 'Faculty', 'y': 'Number of Students'}
+    )
+    fig1.update_traces(
+        marker_color='#0f172a',
+        marker_line_color='white',
+        marker_line_width=2,
+        texttemplate='%{y}',
+        textposition='outside',
+        textfont=dict(size=16, color='#0f172a')
     )
     fig1.update_layout(
         height=550,
         xaxis_tickangle=-45,
-        showlegend=False
+        font=dict(size=14, color='#0f172a', family='Inter'),
+        title_font=dict(size=20, color='#0f172a'),
+        plot_bgcolor='rgba(0,0,0,0)'
     )
-    fig1.update_traces(texttemplate='%{y}', textposition='outside')
     st.plotly_chart(fig1, use_container_width=True)
     
     col1, col2, col3 = st.columns(3)
     with col1:
-        st.metric("🏛️ Total Faculties", len(faculty_counts))
+        st.metric("Total Faculties", len(faculty_counts))
     with col2:
-        st.metric("👥 Largest Faculty", faculty_counts.idxmax())
+        st.metric("Largest Faculty", faculty_counts.idxmax())
     with col3:
-        st.metric("📊 Max Students", faculty_counts.max())
+        st.metric("Max Students", faculty_counts.max())
     
     st.markdown("---")
     
-    # Visualization 2: GPA Distribution
-    st.markdown("## 📊 Visualization 2: Academic Performance (GPA) Distribution")
-    st.markdown("*Academic performance levels among respondents*")
+    # Visualization 2
+    st.markdown("## 📊 Visualization 2: GPA Distribution")
     
     col1, col2 = st.columns([3, 2])
     
@@ -123,36 +134,37 @@ if df is not None:
         fig2 = px.pie(
             values=gpa_counts.values, 
             names=gpa_counts.index,
-            title="GPA Distribution Among Students",
-            color_discrete_sequence=['#8b5cf6', '#a78bfa', '#c4b5fd', '#ddd6fe'],
-            hole=0.3
+            title="GPA Distribution"
         )
-        fig2.update_traces(textposition='inside', textinfo='percent+label', textfont_size=13)
-        fig2.update_layout(height=500)
+        fig2.update_traces(
+            textposition='inside',
+            textinfo='percent+label',
+            textfont=dict(size=14, color='white'),
+            marker=dict(
+                colors=['#0f172a', '#1e293b', '#334155', '#475569'],
+                line=dict(color='white', width=3)
+            )
+        )
+        fig2.update_layout(
+            height=500,
+            font=dict(size=14, color='#0f172a', family='Inter'),
+            title_font=dict(size=20, color='#0f172a')
+        )
         st.plotly_chart(fig2, use_container_width=True)
     
     with col2:
         st.markdown("### 🎓 GPA Breakdown")
-        st.markdown("---")
         for gpa, count in gpa_counts.items():
             percentage = (count / len(df)) * 100
-            
-            if "3.70" in gpa:
-                st.success(f"**{gpa}**\n\n{count} students ({percentage:.1f}%)")
-            elif "3.00" in gpa:
-                st.info(f"**{gpa}**\n\n{count} students ({percentage:.1f}%)")
-            else:
-                st.warning(f"**{gpa}**\n\n{count} students ({percentage:.1f}%)")
+            st.metric(gpa, f"{count}", f"{percentage:.1f}%")
     
     st.markdown("---")
     
-    # Visualization 3: Concentration Difficulty
-    st.markdown("## 📊 Visualization 3: Concentration Difficulties During Studies")
-    st.markdown("*How often students struggle to concentrate due to lack of sleep*")
+    # Visualization 3
+    st.markdown("## 📊 Visualization 3: Concentration Difficulties")
     
     conc_counts = df['How often do you experience difficulty concentrating during lectures or studying due to lack of sleep? '].value_counts()
     
-    # Create ordered categories
     order = ['Never', 'Rarely', 'Sometimes', 'Often', 'Always (every night)']
     conc_ordered = conc_counts.reindex([cat for cat in order if cat in conc_counts.index], fill_value=0)
     
@@ -160,35 +172,39 @@ if df is not None:
         x=conc_ordered.index, 
         y=conc_ordered.values,
         title="Difficulty Concentrating Due to Lack of Sleep",
-        color=conc_ordered.values,
-        color_continuous_scale='RdYlGn_r',
         labels={'x': 'Frequency', 'y': 'Number of Students'}
     )
-    fig3.update_layout(height=500, showlegend=False)
-    fig3.update_traces(texttemplate='%{y}', textposition='outside')
+    fig3.update_traces(
+        marker_color='#1e293b',
+        marker_line_color='white',
+        marker_line_width=2,
+        texttemplate='%{y}',
+        textposition='outside',
+        textfont=dict(size=16, color='#0f172a')
+    )
+    fig3.update_layout(
+        height=500,
+        font=dict(size=14, color='#0f172a', family='Inter'),
+        title_font=dict(size=20, color='#0f172a'),
+        plot_bgcolor='rgba(0,0,0,0)'
+    )
     st.plotly_chart(fig3, use_container_width=True)
     
-    # Impact indicator
-    st.markdown("### 🎯 Concentration Impact Summary")
     col1, col2, col3 = st.columns(3)
     with col1:
         never_rarely = conc_counts.get('Never', 0) + conc_counts.get('Rarely', 0)
-        pct = (never_rarely / len(df)) * 100
-        st.success(f"✅ **Rarely Affected**\n\n{never_rarely} students ({pct:.1f}%)")
+        st.success(f"✅ Rarely Affected: {never_rarely}")
     with col2:
         sometimes = conc_counts.get('Sometimes', 0)
-        pct = (sometimes / len(df)) * 100
-        st.warning(f"⚠️ **Sometimes Affected**\n\n{sometimes} students ({pct:.1f}%)")
+        st.warning(f"⚠️ Sometimes: {sometimes}")
     with col3:
         often_always = conc_counts.get('Often', 0) + conc_counts.get('Always (every night)', 0)
-        pct = (often_always / len(df)) * 100
-        st.error(f"❌ **Frequently Affected**\n\n{often_always} students ({pct:.1f}%)")
+        st.error(f"❌ Often Affected: {often_always}")
     
     st.markdown("---")
     
-    # Visualization 4: Daytime Fatigue
-    st.markdown("## 📊 Visualization 4: Daytime Fatigue Impact on Studies")
-    st.markdown("*Frequency of fatigue affecting ability to study or attend classes*")
+    # Visualization 4
+    st.markdown("## 📊 Visualization 4: Daytime Fatigue")
     
     col1, col2 = st.columns([2, 3])
     
@@ -197,105 +213,83 @@ if df is not None:
         fig4 = px.pie(
             values=fatigue_counts.values, 
             names=fatigue_counts.index,
-            title="Daily Fatigue Impact on Academic Activities",
-            color_discrete_sequence=px.colors.qualitative.Set2
+            title="Daily Fatigue Impact"
         )
-        fig4.update_traces(textposition='auto', textinfo='percent+label', textfont_size=12)
-        fig4.update_layout(height=500)
+        fig4.update_traces(
+            textposition='auto',
+            textinfo='percent+label',
+            textfont=dict(size=14, color='white'),
+            marker=dict(
+                colors=['#0f172a', '#1e293b', '#334155', '#475569', '#64748b'],
+                line=dict(color='white', width=3)
+            )
+        )
+        fig4.update_layout(
+            height=500,
+            font=dict(size=14, color='#0f172a', family='Inter'),
+            title_font=dict(size=20, color='#0f172a')
+        )
         st.plotly_chart(fig4, use_container_width=True)
     
     with col1:
-        st.markdown("### 😴 Fatigue Frequency")
-        st.markdown("---")
+        st.markdown("### 😴 Fatigue Levels")
         for category, count in fatigue_counts.items():
             percentage = (count / len(df)) * 100
-            st.write(f"**{category}**")
-            st.progress(percentage / 100)
-            st.caption(f"{count} students ({percentage:.1f}%)")
-            st.write("")
+            st.metric(category, count, f"{percentage:.1f}%")
     
     st.markdown("---")
     
-    # Visualization 5: Impact on Assignments
-    st.markdown("## 📊 Visualization 5: Sleep Impact on Assignment Completion")
-    st.markdown("*How insufficient sleep affects ability to complete assignments and meet deadlines*")
+    # Visualization 5
+    st.markdown("## 📊 Visualization 5: Impact on Assignments")
     
     impact_counts = df['How would you describe the impact of insufficient sleep on your ability to complete assignments and meet deadlines? '].value_counts()
     
-    # Sort by severity
     impact_order = ['No impact', 'Minor impact', 'Moderate impact', 'Major impact', 'Severe impact']
     impact_ordered = impact_counts.reindex([cat for cat in impact_order if cat in impact_counts.index], fill_value=0)
     
     fig5 = go.Figure()
-    colors = ['#10b981', '#84cc16', '#fbbf24', '#f97316', '#ef4444']
     
     fig5.add_trace(go.Bar(
         x=impact_ordered.index,
         y=impact_ordered.values,
         marker=dict(
-            color=colors[:len(impact_ordered)],
+            color='#334155',
             line=dict(color='white', width=2)
         ),
         text=impact_ordered.values,
         textposition='outside',
-        textfont=dict(size=14)
+        textfont=dict(size=16, color='#0f172a')
     ))
     
     fig5.update_layout(
-        title="Sleep's Impact on Meeting Assignment Deadlines",
+        title="Sleep's Impact on Meeting Deadlines",
         xaxis_title="Impact Level",
         yaxis_title="Number of Students",
         height=550,
-        xaxis_tickangle=-15
+        font=dict(size=14, color='#0f172a', family='Inter'),
+        title_font=dict(size=20, color='#0f172a'),
+        plot_bgcolor='rgba(0,0,0,0)',
+        paper_bgcolor='rgba(0,0,0,0)'
     )
     st.plotly_chart(fig5, use_container_width=True)
     
-    # Impact summary
-    st.markdown("### 📊 Detailed Impact Analysis")
     col1, col2, col3, col4 = st.columns(4)
-    
     with col1:
         no_minor = impact_counts.get('No impact', 0) + impact_counts.get('Minor impact', 0)
-        pct = (no_minor / len(df)) * 100
-        st.metric("✅ No/Minor Impact", no_minor, f"{pct:.1f}%", delta_color="normal")
-    
+        st.metric("No/Minor", no_minor)
     with col2:
         moderate = impact_counts.get('Moderate impact', 0)
-        pct = (moderate / len(df)) * 100
-        st.metric("⚠️ Moderate Impact", moderate, f"{pct:.1f}%", delta_color="off")
-    
+        st.metric("Moderate", moderate)
     with col3:
         major = impact_counts.get('Major impact', 0)
-        pct = (major / len(df)) * 100
-        st.metric("🔴 Major Impact", major, f"{pct:.1f}%", delta_color="inverse")
-    
+        st.metric("Major", major)
     with col4:
         severe = impact_counts.get('Severe impact', 0)
-        pct = (severe / len(df)) * 100
-        st.metric("⛔ Severe Impact", severe, f"{pct:.1f}%", delta_color="inverse")
+        st.metric("Severe", severe)
     
     st.markdown("---")
-    
-    # Summary Section
-    st.markdown("## 📝 Analysis Summary & Recommendations")
-    st.info("""
-    **🔍 Key Findings from Member 2's Analysis:**
-    
-    ✅ **Faculty Diversity**: Broad representation across multiple faculties  
-    ✅ **Academic Performance**: GPA distribution shows correlation potential with sleep quality  
-    ✅ **Concentration Issues**: Significant number of students report focus difficulties  
-    ✅ **Fatigue Impact**: Daytime fatigue notably affects academic engagement  
-    ✅ **Assignment Challenges**: Clear evidence of sleep impacting deadline management  
-    
-    **💡 Recommendations:**
-    - Implement time management workshops focusing on sleep hygiene
-    - Provide academic support for students reporting high fatigue levels
-    - Consider flexible deadline policies during high-stress periods
-    - Promote awareness of sleep's critical role in academic success
-    """)
     
     # Navigation
-    st.markdown("---")
     col1, col2, col3 = st.columns(3)
     with col1:
         if st.button("⬅️ View Member 1", use_container_width=True):
@@ -308,4 +302,4 @@ if df is not None:
             st.switch_page("pages/3_👤_Member_3_Analysis.py")
 
 else:
-    st.error("Unable to load data. Please check your connection and try refreshing.")
+    st.error("Unable to load data.")
