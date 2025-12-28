@@ -87,3 +87,17 @@ st.success("✅ Comparison complete")
 ```
 
 ---
+
+## ✅ **ALL 5 FILES COMPLETE!**
+
+**Your folder structure:**
+```
+your_project/
+├── app.py                           (FILE 2)
+├── styles.py                        (FILE 1)
+├── data_loader.py                   (keep your existing)
+├── requirements.txt                 (keep your existing)
+└── pages/
+    ├── home.py                      (FILE 3)
+    ├── insomnia_visualisation.py    (FILE 4)
+    └── subgroup_comparison.py       (FILE 5)
