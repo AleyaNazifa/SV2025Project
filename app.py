@@ -162,15 +162,15 @@ with st.sidebar:
         
         with col1:
             if st.button("👤\n\nM1", use_container_width=True):
-                st.switch_page("pages/1_👤_Member_1_Analysis.py")
+                st.switch_page("pages/AleyaAelyana.py")
         
         with col2:
             if st.button("👤\n\nM2", use_container_width=True):
-                st.switch_page("pages/2_👤_Member_2_Analysis.py")
+                st.switch_page("pages/AleyaNazifa.py")
         
         with col3:
             if st.button("👤\n\nM3", use_container_width=True):
-                st.switch_page("pages/3_👤_Member_3_Analysis.py")
+                st.switch_page("pages/Nash.py")
     
     st.markdown("---")
     st.markdown("### 🎓 UMK Research")
@@ -218,7 +218,7 @@ if df is not None:
         </div>
         """, unsafe_allow_html=True)
         if st.button("🔍 View Member 1 Analysis", use_container_width=True, key="nav1"):
-            st.switch_page("pages/1_👤_Member_1_Analysis.py")
+            st.switch_page("pages/AleyaAelyana.py")
     
     with col2:
         st.markdown("""
@@ -232,7 +232,7 @@ if df is not None:
         </div>
         """, unsafe_allow_html=True)
         if st.button("🔍 View Member 2 Analysis", use_container_width=True, key="nav2"):
-            st.switch_page("pages/2_👤_Member_2_Analysis.py")
+            st.switch_page("pages/AleyaNazifa.py")
     
     with col3:
         st.markdown("""
@@ -246,7 +246,7 @@ if df is not None:
         </div>
         """, unsafe_allow_html=True)
         if st.button("🔍 View Member 3 Analysis", use_container_width=True, key="nav3"):
-            st.switch_page("pages/3_👤_Member_3_Analysis.py")
+            st.switch_page("pages/Nash.py")
     
     st.markdown("---")
     
@@ -268,13 +268,13 @@ if df is not None:
     with col2:
         st.markdown("## 👥 Research Team")
         st.info("""
-        **👤 Member 1**  
+        **👤 AleyaAelyana**  
         Demographics & Sleep
         
-        **👤 Member 2**  
+        **👤 Aleya Nazifa**  
         Academic Performance
         
-        **👤 Member 3**  
+        **👤 Nash**  
         Lifestyle & Health
         
         ---
