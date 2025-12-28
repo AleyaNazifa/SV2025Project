@@ -1,12 +1,13 @@
+"""Global styling for UMK Sleep Study Dashboard"""
 import streamlit as st
 
-def apply_global_styles():
+def apply_styles():
     st.markdown("""
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
         
         * {
-            font-family: 'Inter', sans-serif !important;
+            font-family: 'Inter', -apple-system, sans-serif !important;
         }
         
         /* Purple gradient background */
@@ -14,17 +15,18 @@ def apply_global_styles():
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         }
         
-        /* White content box */
+        /* White content container */
         .main .block-container {
-            background-color: white;
+            background-color: #ffffff;
             border-radius: 20px;
             padding: 3rem 2rem;
             margin: 2rem auto;
             box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 1400px;
         }
         
-        /* ALL TEXT IN MAIN IS DARK */
-        .main h1, .main h2, .main h3, .main h4, .main h5, .main h6 {
+        /* MAIN CONTENT - Dark text on white */
+        .main h1, .main h2, .main h3, .main h4 {
             color: #1a202c !important;
         }
         
@@ -36,55 +38,54 @@ def apply_global_styles():
             color: #1a202c !important;
         }
         
-        /* Dark sidebar */
+        /* SIDEBAR - Dark background with white text */
         section[data-testid="stSidebar"] {
             background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
         }
         
-        /* All sidebar text is WHITE */
         section[data-testid="stSidebar"] * {
-            color: white !important;
+            color: #f1f5f9 !important;
         }
         
         section[data-testid="stSidebar"] h1,
         section[data-testid="stSidebar"] h2,
         section[data-testid="stSidebar"] h3 {
-            color: white !important;
+            color: #ffffff !important;
             border-bottom: 2px solid #334155;
             padding-bottom: 0.5rem;
             margin-bottom: 1rem;
         }
         
-        /* Multiselect in sidebar */
+        /* Multiselect filters */
         section[data-testid="stSidebar"] [data-baseweb="select"] {
             background-color: #0f172a !important;
             border: 1px solid #475569 !important;
+            border-radius: 8px !important;
         }
         
         section[data-testid="stSidebar"] input {
-            color: white !important;
+            color: #ffffff !important;
             background-color: #0f172a !important;
         }
         
-        /* Blue pills for selected items */
+        /* Blue gradient pills for selected filters */
         section[data-testid="stSidebar"] [data-baseweb="tag"] {
             background: linear-gradient(135deg, #3b82f6, #2563eb) !important;
-            color: white !important;
+            color: #ffffff !important;
             border: none !important;
             border-radius: 6px !important;
-            padding: 0.3rem 0.8rem !important;
-            margin: 0.2rem !important;
+            padding: 0.35rem 0.85rem !important;
+            margin: 0.25rem !important;
+            font-weight: 500 !important;
         }
         
-        section[data-testid="stSidebar"] [data-baseweb="tag"] span {
-            color: white !important;
-        }
-        
+        section[data-testid="stSidebar"] [data-baseweb="tag"] span,
         section[data-testid="stSidebar"] [data-baseweb="tag"] svg {
-            fill: white !important;
+            color: #ffffff !important;
+            fill: #ffffff !important;
         }
         
-        /* Dropdown menu */
+        /* Dropdown menus */
         [data-baseweb="popover"],
         [data-baseweb="menu"] {
             background-color: #1e293b !important;
@@ -92,7 +93,7 @@ def apply_global_styles():
         
         [role="option"] {
             background-color: #1e293b !important;
-            color: white !important;
+            color: #f1f5f9 !important;
         }
         
         [role="option"]:hover {
@@ -102,31 +103,33 @@ def apply_global_styles():
         /* Sidebar buttons */
         section[data-testid="stSidebar"] .stButton > button {
             background: linear-gradient(135deg, #3b82f6, #2563eb);
-            color: white;
+            color: #ffffff;
             border: none;
             border-radius: 10px;
             padding: 0.75rem 1.5rem;
             font-weight: 600;
             width: 100%;
+            transition: all 0.3s;
         }
         
         section[data-testid="stSidebar"] .stButton > button:hover {
             background: linear-gradient(135deg, #2563eb, #1d4ed8);
             transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
         }
         
         /* Sidebar alerts */
         section[data-testid="stSidebar"] .stAlert {
             background: linear-gradient(135deg, #1e3a8a, #1e40af) !important;
-            color: white !important;
             border: none !important;
+            border-radius: 10px !important;
         }
         
         section[data-testid="stSidebar"] .stAlert * {
-            color: white !important;
+            color: #dbeafe !important;
         }
         
-        /* Sidebar radio */
+        /* Sidebar radio buttons */
         section[data-testid="stSidebar"] .stRadio > div {
             background-color: #1e293b;
             padding: 0.75rem;
@@ -134,12 +137,13 @@ def apply_global_styles():
             border: 1px solid #334155;
         }
         
-        /* Metrics */
+        /* Metrics cards */
         [data-testid="stMetric"] {
             background: linear-gradient(135deg, #f8fafc, #f1f5f9);
             padding: 1.5rem;
             border-radius: 12px;
             border: 2px solid #e2e8f0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
         
         [data-testid="stMetricValue"] {
@@ -151,35 +155,40 @@ def apply_global_styles():
         [data-testid="stMetricLabel"] {
             color: #475569 !important;
             font-weight: 600 !important;
+            font-size: 0.875rem !important;
         }
         
-        /* Info boxes in main */
-        .stInfo {
+        /* Alert boxes in main content */
+        .main .stInfo {
             background-color: #dbeafe !important;
             border-left: 4px solid #3b82f6 !important;
             color: #1e40af !important;
+            border-radius: 8px !important;
         }
         
-        .stSuccess {
+        .main .stSuccess {
             background-color: #d1fae5 !important;
             border-left: 4px solid #10b981 !important;
             color: #065f46 !important;
+            border-radius: 8px !important;
         }
         
-        .stWarning {
+        .main .stWarning {
             background-color: #fef3c7 !important;
             border-left: 4px solid #f59e0b !important;
             color: #92400e !important;
+            border-radius: 8px !important;
         }
         
-        .stError {
+        .main .stError {
             background-color: #fee2e2 !important;
             border-left: 4px solid #ef4444 !important;
             color: #991b1b !important;
+            border-radius: 8px !important;
         }
         
         /* Dividers */
-        hr {
+        .main hr {
             border: none;
             border-top: 2px solid #e5e7eb;
             margin: 2rem 0;
@@ -192,14 +201,34 @@ def apply_global_styles():
             border-radius: 10px;
             padding: 1.25rem 1.5rem;
             margin: 1.5rem 0;
+            box-shadow: 0 2px 4px rgba(59, 130, 246, 0.1);
         }
         
         .insight-box strong {
             color: #1e40af !important;
+            font-weight: 600 !important;
         }
         
         .insight-box p {
             color: #1e293b !important;
+            margin: 0;
+        }
+        
+        /* Expanders */
+        .main .streamlit-expanderHeader {
+            background-color: #f8fafc;
+            border-radius: 8px;
+            font-weight: 600;
+            color: #1e293b;
+        }
+        
+        .main .streamlit-expanderHeader:hover {
+            background-color: #f1f5f9;
+        }
+        
+        /* Captions */
+        .main [data-testid="stCaptionContainer"] {
+            color: #64748b !important;
         }
     </style>
     """, unsafe_allow_html=True)
