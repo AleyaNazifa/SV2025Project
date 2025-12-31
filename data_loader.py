@@ -1,7 +1,6 @@
 import streamlit as st
 import pandas as pd
 
-# Google Sheets published CSV URL
 GOOGLE_SHEETS_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSf4umx6QNDel99If8P2otizAHj7jEDxFIsqandbD0zYVzfDheZo2YVkK1_zknpDKjHnBuYWCINgcCe/pub?output=csv"
 
 
@@ -13,11 +12,10 @@ def _normalize_header(s: str) -> str:
 
 @st.cache_data(ttl=300)
 def load_data():
-    """Load data from Google Sheets with automatic refresh"""
     try:
         df = pd.read_csv(GOOGLE_SHEETS_URL)
 
-        # ✅ CRITICAL: normalize headers to remove trailing spaces
+        # ✅ fix trailing spaces in headers
         df.columns = [_normalize_header(c) for c in df.columns]
 
         column_mapping = {
@@ -47,18 +45,13 @@ def load_data():
             "Do you use any methods to help you sleep?": "SleepMethods",
         }
 
-        # Normalize mapping keys too (same transformation)
         column_mapping = {_normalize_header(k): v for k, v in column_mapping.items()}
-
-        # Rename only existing columns (prevents KeyError)
         existing_map = {k: v for k, v in column_mapping.items() if k in df.columns}
         df = df.rename(columns=existing_map)
 
-        # Convert timestamp to datetime
         if "Timestamp" in df.columns:
             df["Timestamp"] = pd.to_datetime(df["Timestamp"], errors="coerce")
 
-        # Calculate Insomnia Severity Index (ISI)
         required = {"DifficultyFallingAsleep", "SleepQuality", "NightWakeups"}
         if required.issubset(df.columns):
             df["InsomniaSeverity_index"] = calculate_insomnia_index(df)
@@ -74,7 +67,6 @@ def load_data():
 
 
 def calculate_insomnia_index(df: pd.DataFrame) -> pd.Series:
-    """Calculate a simple insomnia severity score based on key indicators"""
     sleep_difficulty_map = {
         "Never": 0,
         "Rarely (1–2 times a week)": 1,
@@ -83,7 +75,6 @@ def calculate_insomnia_index(df: pd.DataFrame) -> pd.Series:
         "Always (every night)": 4,
     }
 
-    # Sleep quality: 1=worst, 5=best (invert into severity)
     quality_map = {"1": 4, "2": 3, "3": 2, "4": 1, "5": 0}
 
     score = 0
@@ -91,14 +82,12 @@ def calculate_insomnia_index(df: pd.DataFrame) -> pd.Series:
     score += df["SleepQuality"].astype(str).map(quality_map).fillna(0)
     score += df["NightWakeups"].map(sleep_difficulty_map).fillna(0)
 
-    # Normalize to 0–28 scale
     return (score / 12 * 28).round(1)
 
 
 def get_data_info(df):
     if df is None or len(df) == 0:
         return None
-
     return {
         "total_responses": len(df),
         "last_updated": df["Timestamp"].max() if "Timestamp" in df.columns else None,
@@ -117,7 +106,6 @@ def display_sidebar_info():
 
     if df is not None:
         info = get_data_info(df)
-
         st.sidebar.success("✅ Data Loaded Successfully")
         st.sidebar.metric("Total Responses", info["total_responses"])
 
