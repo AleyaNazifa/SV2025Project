@@ -19,9 +19,9 @@ h1 {font-weight: 800;}
     unsafe_allow_html=True,
 )
 
-home = st.Page("home.py", title="Overview", icon="🏠", default=True)
-aleya_aelyana = st.Page("page_aleya_aelyana.py", title="Sleep Patterns", icon="😴")
-aleya_nazifa = st.Page("page_aleya_nazifa.py", title="Academic Impact", icon="📚")
+home = st.Page("home.py", title="Home", icon="🏠", default=True)
+aleya_nazifa = st.Page("page_aleya_nazifa.py", title="Sleep Patterns", icon="😴")
+aleya_aelyana = st.Page("page_aleya_aelyana.py", title="Academic Impact", icon="📚")
 nash = st.Page("page_nash.py", title="Lifestyle Factors", icon="🏃")
 
 pg = st.navigation({"📊 Dashboard": [home, aleya_aelyana, aleya_nazifa, nash]})
