@@ -7,30 +7,13 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-# Custom CSS
+# Optional styling (safe)
 st.markdown(
     """
 <style>
-    [data-testid="stSidebar"] {
-        background: linear-gradient(180deg, #1e3a8a 0%, #3b82f6 100%);
-    }
-    [data-testid="stSidebar"] [data-testid="stMarkdownContainer"] {
-        color: white;
-    }
-    .stRadio > label {
-        color: white !important;
-        font-weight: 600;
-    }
-    [data-testid="stMetricValue"] {
-        font-size: 2rem;
-        font-weight: bold;
-    }
-    h1 {
-        background: linear-gradient(90deg, #3b82f6 0%, #8b5cf6 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        font-weight: 800;
-    }
+[data-testid="stSidebar"] {background: linear-gradient(180deg, #1e3a8a 0%, #3b82f6 100%);}
+[data-testid="stSidebar"] * {color: white !important;}
+h1 {font-weight: 800;}
 </style>
 """,
     unsafe_allow_html=True,
