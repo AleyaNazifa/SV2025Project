@@ -85,7 +85,7 @@ h1, h2, h3 {
 )
 
 # Pages
-home = st.Page("home.py", title="Overview", icon="🏠", default=True)
+home = st.Page("home.py", title="Home", icon="🏠", default=True)
 aleya_nazifa = st.Page("page_aleya_nazifa.py", title="Sleep Patterns", icon="😴")   # Nazifa
 aleya_aelyana = st.Page("page_aleya_aelyana.py", title="Academic Impact", icon="📚")  # Aelyana
 nash = st.Page("page_nash.py", title="Lifestyle Factors", icon="🏃")
