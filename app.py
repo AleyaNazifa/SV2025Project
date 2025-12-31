@@ -7,9 +7,6 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-# =========================
-# GLOBAL PROFESSIONAL THEME
-# =========================
 st.markdown(
     """
 <style>
@@ -28,33 +25,34 @@ st.markdown(
     color: #E2E8F0 !important; /* slate-200 */
 }
 
-/* Sidebar section headers */
-[data-testid="stSidebar"] h1, 
-[data-testid="stSidebar"] h2, 
-[data-testid="stSidebar"] h3 {
+/* Sidebar group header ("Menu") */
+[data-testid="stSidebar"] h2 {
     color: #F1F5F9 !important; /* slate-100 */
+    font-weight: 800 !important;
+    letter-spacing: 0.2px;
 }
 
-/* ---- Sidebar menu links styling ---- */
+/* ---- Sidebar menu links ---- */
 [data-testid="stSidebar"] a {
-    border-radius: 10px;
+    border-radius: 12px;
     padding: 10px 12px;
     margin: 2px 0px;
     text-decoration: none;
+    transition: background 120ms ease-in-out;
 }
 
-/* Hover effect */
+/* Hover */
 [data-testid="stSidebar"] a:hover {
     background: rgba(148,163,184,0.18);
 }
 
-/* Selected item style */
+/* Selected item */
 [data-testid="stSidebar"] [aria-current="page"] {
     background: rgba(148,163,184,0.22) !important;
-    border-radius: 10px;
+    border-radius: 12px;
 }
 
-/* ---- Global headings ---- */
+/* ---- Headings ---- */
 h1, h2, h3 {
     color: #0F172A; /* slate-900 */
 }
@@ -80,18 +78,18 @@ h1, h2, h3 {
 /* Figure caption */
 .figure-caption {
     font-size: 13px;
-    color: #475569; /* slate-600 */
+    color: #475569;
     margin-top: -6px;
 }
 
-/* Interpretation text */
+/* Interpretation */
 .interpretation {
-    color: #334155; /* slate-700 */
+    color: #334155;
     line-height: 1.6;
     font-size: 14px;
 }
 
-/* Divider line */
+/* Divider */
 .hr {
     height: 1px;
     background: rgba(148,163,184,0.35);
@@ -103,14 +101,11 @@ h1, h2, h3 {
     unsafe_allow_html=True,
 )
 
-# =========================
-# PAGES WITH MATERIAL ICONS
-# =========================
-home = st.Page("home.py", title=":material/home: Homepage", default=True)
-aleya_nazifa = st.Page("page_aleya_nazifa.py", title=":material/bedtime: Sleep Patterns")   # Nazifa
-aleya_aelyana = st.Page("page_aleya_aelyana.py", title=":material/school: Academic Impact")  # Aelyana
-nash = st.Page("page_nash.py", title=":material/insights: Lifestyle Factors")
+# ✅ Use clean titles (no :material: here)
+home = st.Page("home.py", title="Homepage", icon="🏠", default=True)
+aleya_nazifa = st.Page("page_aleya_nazifa.py", title="Sleep Patterns", icon="😴")
+aleya_aelyana = st.Page("page_aleya_aelyana.py", title="Academic Impact", icon="📚")
+nash = st.Page("page_nash.py", title="Lifestyle Factors", icon="🏃")
 
-# Sidebar navigation group name
 pg = st.navigation({"Menu": [home, aleya_nazifa, aleya_aelyana, nash]})
 pg.run()
