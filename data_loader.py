@@ -1,9 +1,15 @@
 import streamlit as st
 import pandas as pd
-from datetime import datetime
 
 # Google Sheets published CSV URL
 GOOGLE_SHEETS_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSf4umx6QNDel99If8P2otizAHj7jEDxFIsqandbD0zYVzfDheZo2YVkK1_zknpDKjHnBuYWCINgcCe/pub?output=csv"
+
+
+def _normalize_header(s: str) -> str:
+    s = str(s).strip()
+    s = " ".join(s.split())  # collapse multiple spaces
+    return s
+
 
 @st.cache_data(ttl=300)
 def load_data():
@@ -11,11 +17,9 @@ def load_data():
     try:
         df = pd.read_csv(GOOGLE_SHEETS_URL)
 
-        # ✅ Clean headers: strip + collapse multiple spaces
-        df.columns = [str(c).strip() for c in df.columns]
-        df.columns = [" ".join(c.split()) for c in df.columns]
+        # ✅ CRITICAL: normalize headers to remove trailing spaces
+        df.columns = [_normalize_header(c) for c in df.columns]
 
-        # ✅ Build mapping (also normalized)
         column_mapping = {
             "Timestamp": "Timestamp",
             "What is your gender?": "Gender",
@@ -43,23 +47,24 @@ def load_data():
             "Do you use any methods to help you sleep?": "SleepMethods",
         }
 
-        # ✅ Rename only keys that actually exist (prevents KeyError)
-        column_mapping_clean = {" ".join(k.split()): v for k, v in column_mapping.items()}
-        existing_map = {k: v for k, v in column_mapping_clean.items() if k in df.columns}
+        # Normalize mapping keys too (same transformation)
+        column_mapping = {_normalize_header(k): v for k, v in column_mapping.items()}
+
+        # Rename only existing columns (prevents KeyError)
+        existing_map = {k: v for k, v in column_mapping.items() if k in df.columns}
         df = df.rename(columns=existing_map)
 
-        # Convert timestamp to datetime (safe)
+        # Convert timestamp to datetime
         if "Timestamp" in df.columns:
             df["Timestamp"] = pd.to_datetime(df["Timestamp"], errors="coerce")
 
-        # ✅ Compute InsomniaSeverity_index only if needed cols exist
+        # Calculate Insomnia Severity Index (ISI)
         required = {"DifficultyFallingAsleep", "SleepQuality", "NightWakeups"}
         if required.issubset(df.columns):
             df["InsomniaSeverity_index"] = calculate_insomnia_index(df)
         else:
             missing = sorted(list(required - set(df.columns)))
-            st.warning(f"Cannot compute InsomniaSeverity_index. Missing columns: {missing}")
-            st.info(f"Available columns: {df.columns.tolist()}")
+            st.warning(f"Cannot compute InsomniaSeverity_index (missing columns: {missing}).")
 
         return df
 
@@ -67,82 +72,80 @@ def load_data():
         st.error(f"Error loading data: {e}")
         return None
 
-def calculate_insomnia_index(df):
+
+def calculate_insomnia_index(df: pd.DataFrame) -> pd.Series:
     """Calculate a simple insomnia severity score based on key indicators"""
-    score = 0
-    
-    # Difficulty falling asleep (0-4 scale)
     sleep_difficulty_map = {
-        'Never': 0,
-        'Rarely (1–2 times a week)': 1,
-        'Sometimes (3–4 times a week)': 2,
-        'Often (5–6 times a week)': 3,
-        'Always (every night)': 4
+        "Never": 0,
+        "Rarely (1–2 times a week)": 1,
+        "Sometimes (3–4 times a week)": 2,
+        "Often (5–6 times a week)": 3,
+        "Always (every night)": 4,
     }
-    score += df['DifficultyFallingAsleep'].map(sleep_difficulty_map).fillna(0)
-    
-    # Sleep quality (inverse, 0-4 scale)
-    quality_map = {
-        '1': 4, '2': 3, '3': 2, '4': 1, '5': 0
-    }
-    score += df['SleepQuality'].astype(str).map(quality_map).fillna(0)
-    
-    # Night wakeups (0-4 scale)
-    score += df['NightWakeups'].map(sleep_difficulty_map).fillna(0)
-    
-    # Normalize to 0-28 scale (like standard ISI)
+
+    # Sleep quality: 1=worst, 5=best (invert into severity)
+    quality_map = {"1": 4, "2": 3, "3": 2, "4": 1, "5": 0}
+
+    score = 0
+    score += df["DifficultyFallingAsleep"].map(sleep_difficulty_map).fillna(0)
+    score += df["SleepQuality"].astype(str).map(quality_map).fillna(0)
+    score += df["NightWakeups"].map(sleep_difficulty_map).fillna(0)
+
+    # Normalize to 0–28 scale
     return (score / 12 * 28).round(1)
 
+
 def get_data_info(df):
-    """Get summary information about the dataset"""
-    if df is None:
+    if df is None or len(df) == 0:
         return None
-    
+
     return {
-        'total_responses': len(df),
-        'last_updated': df['Timestamp'].max(),
-        'date_range': f"{df['Timestamp'].min().strftime('%Y-%m-%d')} to {df['Timestamp'].max().strftime('%Y-%m-%d')}",
-        'faculties': df['Faculty'].nunique(),
-        'avg_isi': df['InsomniaSeverity_index'].mean()
+        "total_responses": len(df),
+        "last_updated": df["Timestamp"].max() if "Timestamp" in df.columns else None,
+        "faculties": df["Faculty"].nunique() if "Faculty" in df.columns else None,
+        "avg_isi": df["InsomniaSeverity_index"].mean() if "InsomniaSeverity_index" in df.columns else None,
     }
 
+
 def display_sidebar_info():
-    """Display beautiful sidebar with auto-refresh info"""
     st.sidebar.markdown("### 📊 Data Status")
-    
-    if 'data' not in st.session_state or st.session_state.data is None:
-        st.session_state.data = load_data()
-    
-    df = st.session_state.data
-    
+
+    if "data" not in st.session_state or st.session_state["data"] is None:
+        st.session_state["data"] = load_data()
+
+    df = st.session_state["data"]
+
     if df is not None:
         info = get_data_info(df)
-        
+
         st.sidebar.success("✅ Data Loaded Successfully")
-        st.sidebar.metric("Total Responses", info['total_responses'])
-        st.sidebar.metric("Last Updated", 
-                         info['last_updated'].strftime('%Y-%m-%d %H:%M'))
-        st.sidebar.metric("Faculties", info['faculties'])
-        st.sidebar.metric("Avg ISI Score", f"{info['avg_isi']:.1f}")
-        
+        st.sidebar.metric("Total Responses", info["total_responses"])
+
+        if info["last_updated"] is not None:
+            st.sidebar.metric("Last Updated", info["last_updated"].strftime("%Y-%m-%d %H:%M"))
+
+        if info["faculties"] is not None:
+            st.sidebar.metric("Faculties", info["faculties"])
+
+        if info["avg_isi"] is not None:
+            st.sidebar.metric("Avg ISI Score", f"{info['avg_isi']:.1f}")
+
         st.sidebar.markdown("---")
-        st.sidebar.caption(f"📅 Data Range: {info['date_range']}")
         st.sidebar.caption("🔄 Auto-refreshes every 5 minutes")
-        
-        # Manual refresh button
+
         if st.sidebar.button("🔄 Refresh Now", use_container_width=True):
             st.cache_data.clear()
-            st.session_state.data = load_data()
+            st.session_state["data"] = load_data()
             st.rerun()
     else:
         st.sidebar.error("❌ Failed to load data")
         if st.sidebar.button("🔄 Retry", use_container_width=True):
             st.cache_data.clear()
-            st.session_state.data = load_data()
+            st.session_state["data"] = load_data()
             st.rerun()
 
+
 def get_df():
-    """Get the current dataframe"""
-    if 'data' not in st.session_state:
-        st.session_state.data = load_data()
-    return st.session_state.data
+    if "data" not in st.session_state:
+        st.session_state["data"] = load_data()
+    return st.session_state["data"]
