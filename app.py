@@ -7,7 +7,6 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-# Optional styling (safe)
 st.markdown(
     """
 <style>
@@ -19,10 +18,16 @@ h1 {font-weight: 800;}
     unsafe_allow_html=True,
 )
 
-home = st.Page("home.py", title="Home", icon="🏠", default=True)
+home = st.Page("home.py", title="Overview", icon="🏠", default=True)
+
+# ✅ SWAPPED:
+# Nazifa now = Sleep Patterns
 aleya_nazifa = st.Page("page_aleya_nazifa.py", title="Sleep Patterns", icon="😴")
+
+# Aelyana now = Academic Impact
 aleya_aelyana = st.Page("page_aleya_aelyana.py", title="Academic Impact", icon="📚")
+
 nash = st.Page("page_nash.py", title="Lifestyle Factors", icon="🏃")
 
-pg = st.navigation({"📊 Dashboard": [home, aleya_aelyana, aleya_nazifa, nash]})
+pg = st.navigation({"📊 Dashboard": [home, aleya_nazifa, aleya_aelyana, nash]})
 pg.run()
