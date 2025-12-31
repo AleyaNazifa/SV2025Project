@@ -11,7 +11,6 @@ def pct(n, total):
 def render():
     display_sidebar_info()
     df = get_df()
-
     if df is None or len(df) == 0:
         st.error("No data available.")
         return
@@ -22,102 +21,60 @@ def render():
     st.markdown("### How Sleep Affects Academic Performance")
     st.markdown("---")
 
-    # =========================
-    # B1 Bar — GPA distribution
-    # =========================
-    fig = px.bar(
-        df["GPA"].value_counts().sort_index(),
-        title="GPA Distribution"
-    )
+    # B1 Bar — GPA counts
+    gpa_counts = df["GPA"].value_counts().reset_index()
+    gpa_counts.columns = ["GPA", "Count"]
+    fig = px.bar(gpa_counts, x="GPA", y="Count", title="GPA Distribution")
     st.plotly_chart(fig, use_container_width=True)
-    st.caption("Figure B1. Distribution of GPA among students.")
-
+    st.caption("Figure B1. Bar chart of GPA distribution.")
     st.markdown(
-        """
-**Interpretation (B1).** GPA distribution provides an overview of academic achievement.
-Comparing GPA with sleep indicators helps assess whether strong academic
-performance coexists with sleep deprivation.
-"""
+        "**Interpretation (B1).** GPA distribution summarises achievement levels and provides context for "
+        "examining whether sleep problems are present even among higher-performing students."
     )
 
-    # =========================
-    # B2 Stacked bar — Assignment impact by year
-    # =========================
+    # B2 Stacked bar — Assignment impact by YearOfStudy
     fig = px.histogram(
-        df,
-        x="YearOfStudy",
-        color="AssignmentImpact",
-        barmode="stack",
-        title="Assignment Impact by Year of Study"
+        df, x="YearOfStudy", color="AssignmentImpact",
+        barmode="stack", title="Assignment Impact by Year of Study"
     )
     st.plotly_chart(fig, use_container_width=True)
-    st.caption("Figure B2. Stacked bar chart of assignment impact by year of study.")
-
+    st.caption("Figure B2. Stacked bars comparing assignment impact across year of study.")
     st.markdown(
-        """
-**Interpretation (B2).** Higher years of study tend to report greater assignment impact,
-likely reflecting increased workload and time pressure that may worsen
-sleep deprivation.
-"""
+        "**Interpretation (B2).** If higher years show larger ‘major impact’ segments, it suggests workload "
+        "escalation may amplify sleep-related academic difficulties."
     )
 
-    # =========================
-    # B3 Scatter — ISI vs sleep hours
-    # =========================
+    # B3 Scatter — ISI vs SleepHours_est
     fig = px.scatter(
-        df,
-        x="SleepHours_est",
-        y="InsomniaSeverity_index",
-        color="GPA",
-        title="Insomnia Severity vs Sleep Duration"
+        df, x="SleepHours_est", y="InsomniaSeverity_index",
+        color="GPA", title="Insomnia Severity vs Sleep Duration"
     )
     st.plotly_chart(fig, use_container_width=True)
-    st.caption("Figure B3. Scatter plot of insomnia severity versus sleep duration.")
-
+    st.caption("Figure B3. Scatter plot of insomnia severity against sleep duration (colored by GPA band).")
     st.markdown(
-        """
-**Interpretation (B3).** A negative relationship is observed: students with shorter
-sleep duration generally exhibit higher insomnia severity scores.
-This highlights the academic risk associated with chronic sleep loss.
-"""
+        "**Interpretation (B3).** Students with shorter sleep frequently show higher insomnia severity, "
+        "indicating sleep restriction and insomnia symptoms may coexist with academic demands."
     )
 
-    # =========================
-    # B4 Treemap — Academic performance
-    # =========================
-    fig = px.treemap(
-        df,
-        path=["AcademicPerformance"],
-        title="Composition of Academic Performance Ratings"
-    )
+    # B4 Treemap — AcademicPerformance
+    fig = px.treemap(df, path=["AcademicPerformance"], title="Self-Rated Academic Performance Composition")
     st.plotly_chart(fig, use_container_width=True)
     st.caption("Figure B4. Treemap of self-rated academic performance.")
-
     st.markdown(
-        """
-**Interpretation (B4).** The treemap shows how students perceive their academic success.
-Differences between perceived and objective performance may reflect fatigue,
-stress, or reduced confidence linked to poor sleep.
-"""
+        "**Interpretation (B4).** The composition of self-ratings reflects perceived success; mismatch between "
+        "perception and objective GPA may indicate fatigue, stress, or reduced confidence."
     )
 
-    # =========================
     # B5 Line — Responses over time
-    # =========================
-    df["Date"] = pd.to_datetime(df["Timestamp"]).dt.date
-    fig = px.line(
-        df.groupby("Date").size(),
-        title="Survey Responses Over Time"
-    )
+    df_time = df.copy()
+    df_time["Date"] = pd.to_datetime(df_time["Timestamp"], errors="coerce").dt.date
+    ts = df_time.groupby("Date").size().reset_index(name="Responses")
+    fig = px.line(ts, x="Date", y="Responses", markers=True, title="Survey Responses Over Time")
     st.plotly_chart(fig, use_container_width=True)
-    st.caption("Figure B5. Daily count of survey responses over time.")
-
+    st.caption("Figure B5. Line chart showing number of responses per day.")
     st.markdown(
-        """
-**Interpretation (B5).** The time trend confirms consistent participation,
-supporting the reliability of the dataset for analysing relationships
-between sleep patterns and academic outcomes.
-"""
+        "**Interpretation (B5).** A steady response pattern supports dataset stability and reduces the chance "
+        "that results are driven by one-time anomalies."
     )
 
 
