@@ -35,6 +35,25 @@ st.markdown(
     color: #F1F5F9 !important; /* slate-100 */
 }
 
+/* ---- Sidebar menu links styling ---- */
+[data-testid="stSidebar"] a {
+    border-radius: 10px;
+    padding: 10px 12px;
+    margin: 2px 0px;
+    text-decoration: none;
+}
+
+/* Hover effect */
+[data-testid="stSidebar"] a:hover {
+    background: rgba(148,163,184,0.18);
+}
+
+/* Selected item style */
+[data-testid="stSidebar"] [aria-current="page"] {
+    background: rgba(148,163,184,0.22) !important;
+    border-radius: 10px;
+}
+
 /* ---- Global headings ---- */
 h1, h2, h3 {
     color: #0F172A; /* slate-900 */
@@ -84,11 +103,14 @@ h1, h2, h3 {
     unsafe_allow_html=True,
 )
 
-# Pages
-home = st.Page("home.py", title="Home", icon="🏠", default=True)
-aleya_nazifa = st.Page("page_aleya_nazifa.py", title="Sleep Patterns", icon="😴")   # Nazifa
-aleya_aelyana = st.Page("page_aleya_aelyana.py", title="Academic Impact", icon="📚")  # Aelyana
-nash = st.Page("page_nash.py", title="Lifestyle Factors", icon="🏃")
+# =========================
+# PAGES WITH MATERIAL ICONS
+# =========================
+home = st.Page("home.py", title=":material/home: Homepage", default=True)
+aleya_nazifa = st.Page("page_aleya_nazifa.py", title=":material/bedtime: Sleep Patterns")   # Nazifa
+aleya_aelyana = st.Page("page_aleya_aelyana.py", title=":material/school: Academic Impact")  # Aelyana
+nash = st.Page("page_nash.py", title=":material/insights: Lifestyle Factors")
 
-pg = st.navigation({"📊 Dashboard": [home, aleya_nazifa, aleya_aelyana, nash]})
+# Sidebar navigation group name
+pg = st.navigation({"Menu": [home, aleya_nazifa, aleya_aelyana, nash]})
 pg.run()
