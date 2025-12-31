@@ -1,168 +1,210 @@
 import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
-import numpy as np
 from data_loader import display_sidebar_info, get_df
+
+
+def _pct(n: int, total: int) -> float:
+    return (n / total * 100) if total else 0.0
 
 
 def render():
     display_sidebar_info()
-    df = get_df()
 
+    df = get_df()
     if df is None or len(df) == 0:
         st.error("Failed to load data.")
         return
+
+    total = len(df)
 
     st.title("🏃 Lifestyle Factors Analysis")
     st.markdown("### Technology, Caffeine, Exercise, and Stress Impact on Sleep")
     st.markdown("---")
 
-    col1, col2, col3, col4 = st.columns(4)
-
-    with col1:
-        devices = df["DeviceUsage"].astype(str).str.contains("Always|Often", na=False).sum() if "DeviceUsage" in df.columns else 0
-        st.metric("High Device Usage", f"{devices}", f"{devices/len(df)*100:.1f}%", delta_color="inverse")
-
-    with col2:
-        caffeine = df["CaffeineConsumption"].astype(str).str.contains("Always|Often", na=False).sum() if "CaffeineConsumption" in df.columns else 0
-        st.metric("High Caffeine Users", f"{caffeine}", f"{caffeine/len(df)*100:.1f}%", delta_color="inverse")
-
-    with col3:
-        sedentary = df["PhysicalActivity"].astype(str).str.contains("Never|Rarely", na=False).sum() if "PhysicalActivity" in df.columns else 0
-        st.metric("Sedentary Lifestyle", f"{sedentary}", f"{sedentary/len(df)*100:.1f}%", delta_color="inverse")
-
-    with col4:
-        high_stress = df["StressLevel"].astype(str).str.contains("High|Extremely high", na=False).sum() if "StressLevel" in df.columns else 0
-        st.metric("High Stress Levels", f"{high_stress}", f"{high_stress/len(df)*100:.1f}%", delta_color="inverse")
-
-    st.markdown("---")
+    # ======================
+    # C1 — Device usage
+    # ======================
     st.markdown("#### 📱 Device Usage Before Sleep")
-
     if "DeviceUsage" in df.columns:
-        device_counts = df["DeviceUsage"].value_counts()
-        fig, ax = plt.subplots(figsize=(9, 4))
+        device_counts = df["DeviceUsage"].value_counts(dropna=True)
+
+        fig, ax = plt.subplots(figsize=(10, 4))
         device_counts.plot(kind="barh", ax=ax, edgecolor="black")
-        ax.set_xlabel("Count")
-        ax.set_ylabel("Device Usage")
+        ax.set_xlabel("Number of Students", fontsize=11, fontweight="bold")
+        ax.set_ylabel("Device Usage Frequency", fontsize=11, fontweight="bold")
         ax.grid(axis="x", alpha=0.3)
         plt.tight_layout()
         st.pyplot(fig)
 
-    st.markdown("---")
-    st.markdown("#### ☕ Caffeine Consumption")
+        st.caption("Figure C1. Frequency of electronic device usage before going to sleep.")
 
+        heavy = df["DeviceUsage"].astype(str).str.contains("Always|Often", na=False).sum()
+        st.markdown(
+            f"""
+**Interpretation (C1).** High pre-sleep device use can disrupt sleep through blue-light exposure and cognitive stimulation. In this dataset, **{heavy} students ({_pct(heavy, total):.1f}%)**
+report using devices often/always before sleep. This pattern may contribute to delayed bedtime, reduced melatonin release, and increased difficulty falling asleep.
+"""
+        )
+    else:
+        st.warning("DeviceUsage column not available.")
+
+    st.markdown("---")
+
+    # ======================
+    # C2 — Caffeine consumption
+    # ======================
+    st.markdown("#### ☕ Caffeine Consumption Frequency")
     if "CaffeineConsumption" in df.columns:
-        caffeine_counts = df["CaffeineConsumption"].value_counts()
-        fig, ax = plt.subplots(figsize=(9, 4))
+        caffeine_counts = df["CaffeineConsumption"].value_counts(dropna=True)
+
+        fig, ax = plt.subplots(figsize=(10, 4))
         caffeine_counts.plot(kind="bar", ax=ax, edgecolor="black")
-        ax.set_xlabel("Frequency")
-        ax.set_ylabel("Count")
+        ax.set_xlabel("Caffeine Consumption Frequency", fontsize=11, fontweight="bold")
+        ax.set_ylabel("Number of Students", fontsize=11, fontweight="bold")
         ax.set_xticklabels(ax.get_xticklabels(), rotation=45, ha="right")
         ax.grid(axis="y", alpha=0.3)
         plt.tight_layout()
         st.pyplot(fig)
 
-    st.markdown("---")
-    st.markdown("#### 🏃 Physical Activity")
+        st.caption("Figure C2. Frequency of caffeine consumption to stay awake or alert.")
 
+        high_caff = df["CaffeineConsumption"].astype(str).str.contains("Always|Often", na=False).sum()
+        st.markdown(
+            f"""
+**Interpretation (C2).** Caffeine intake can increase alertness but may impair sleep onset and sleep depth, particularly when consumed later in the day. Here, **{high_caff} students
+({_pct(high_caff, total):.1f}%)** report high-frequency use (often/always), which could indicate reliance on stimulants to compensate for sleep debt and daytime fatigue.
+"""
+        )
+    else:
+        st.warning("CaffeineConsumption column not available.")
+
+    st.markdown("---")
+
+    # ======================
+    # C3 — Physical activity
+    # ======================
+    st.markdown("#### 🏃 Physical Activity Level")
     if "PhysicalActivity" in df.columns:
-        activity_counts = df["PhysicalActivity"].value_counts()
-        fig, ax = plt.subplots(figsize=(9, 4))
+        activity_counts = df["PhysicalActivity"].value_counts(dropna=True)
+
+        fig, ax = plt.subplots(figsize=(10, 4))
         activity_counts.plot(kind="barh", ax=ax, edgecolor="black")
-        ax.set_xlabel("Count")
-        ax.set_ylabel("Activity Level")
+        ax.set_xlabel("Number of Students", fontsize=11, fontweight="bold")
+        ax.set_ylabel("Physical Activity Frequency", fontsize=11, fontweight="bold")
         ax.grid(axis="x", alpha=0.3)
         plt.tight_layout()
         st.pyplot(fig)
 
-    st.markdown("---")
-    st.markdown("#### 😰 Stress Level Distribution")
+        st.caption("Figure C3. Distribution of physical activity/exercise frequency among respondents.")
 
+        sedentary = df["PhysicalActivity"].astype(str).str.contains("Never|Rarely", na=False).sum()
+        st.markdown(
+            f"""
+**Interpretation (C3).** Regular physical activity is associated with better sleep quality and stress regulation. In this dataset, **{sedentary} students ({_pct(sedentary, total):.1f}%)**
+report being sedentary (never/rarely). Higher sedentary rates may correspond with poorer sleep outcomes and reduced resilience to academic stress.
+"""
+        )
+    else:
+        st.warning("PhysicalActivity column not available.")
+
+    st.markdown("---")
+
+    # ======================
+    # C4 — Stress levels
+    # ======================
+    st.markdown("#### 😰 Academic Stress Level Distribution")
     if "StressLevel" in df.columns:
-        stress_counts = df["StressLevel"].value_counts()
+        stress_counts = df["StressLevel"].value_counts(dropna=True)
+
         fig, ax = plt.subplots(figsize=(7, 6))
         ax.pie(stress_counts, labels=stress_counts.index, autopct="%1.1f%%", startangle=90)
-        ax.set_title("Stress Level Distribution")
+        ax.set_title("Stress Level Distribution", fontsize=12, fontweight="bold")
         plt.tight_layout()
         st.pyplot(fig)
 
-    st.markdown("---")
-    st.markdown("#### 🎯 Lifestyle Risk Score")
+        st.caption("Figure C4. Proportion of students by reported academic stress level.")
 
-    def calculate_lifestyle_risk(row):
+        high_stress = df["StressLevel"].astype(str).str.contains("High|Extremely high", na=False).sum()
+        st.markdown(
+            f"""
+**Interpretation (C4).** Stress is a well-established contributor to insomnia via physiological and cognitive arousal. Here, **{high_stress} students ({_pct(high_stress, total):.1f}%)**
+report high or extremely high stress. Elevated stress prevalence suggests that sleep interventions may need to include stress management and time-planning support.
+"""
+        )
+    else:
+        st.warning("StressLevel column not available.")
+
+    st.markdown("---")
+
+    # ======================
+    # C5 — Lifestyle risk score histogram
+    # ======================
+    st.markdown("#### 🎯 Lifestyle Risk Score Distribution")
+
+    def lifestyle_risk(row) -> int:
         risk = 0
 
-        # Device usage
-        if pd.notna(row.get("DeviceUsage")) and "Always" in str(row.get("DeviceUsage")):
+        # Devices
+        v = str(row.get("DeviceUsage", ""))
+        if "Always" in v:
             risk += 3
-        elif pd.notna(row.get("DeviceUsage")) and "Often" in str(row.get("DeviceUsage")):
+        elif "Often" in v:
             risk += 2
 
-        # Caffeine usage
-        if pd.notna(row.get("CaffeineConsumption")) and "Always" in str(row.get("CaffeineConsumption")):
+        # Caffeine
+        c = str(row.get("CaffeineConsumption", ""))
+        if "Always" in c:
             risk += 3
-        elif pd.notna(row.get("CaffeineConsumption")) and "Often" in str(row.get("CaffeineConsumption")):
+        elif "Often" in c:
             risk += 2
 
         # Exercise (risk if inactive)
-        if pd.notna(row.get("PhysicalActivity")) and ("Never" in str(row.get("PhysicalActivity")) or "Rarely" in str(row.get("PhysicalActivity"))):
+        p = str(row.get("PhysicalActivity", ""))
+        if ("Never" in p) or ("Rarely" in p):
             risk += 2
 
         # Stress
-        if pd.notna(row.get("StressLevel")) and "Extremely high" in str(row.get("StressLevel")):
+        s = str(row.get("StressLevel", ""))
+        if "Extremely high" in s:
             risk += 3
-        elif pd.notna(row.get("StressLevel")) and "High" in str(row.get("StressLevel")):
+        elif "High" in s:
             risk += 2
 
         return risk
 
     df_plot = df.copy()
-    df_plot["Lifestyle_Risk"] = df_plot.apply(calculate_lifestyle_risk, axis=1)
+    df_plot["Lifestyle_Risk"] = df_plot.apply(lifestyle_risk, axis=1)
 
-    col1, col2, col3 = st.columns(3)
-    with col1:
-        low = (df_plot["Lifestyle_Risk"] <= 3).sum()
-        st.metric("Low Risk", low, f"{low/len(df_plot)*100:.1f}%")
-    with col2:
-        mid = ((df_plot["Lifestyle_Risk"] > 3) & (df_plot["Lifestyle_Risk"] <= 6)).sum()
-        st.metric("Moderate Risk", mid, f"{mid/len(df_plot)*100:.1f}%")
-    with col3:
-        high = (df_plot["Lifestyle_Risk"] > 6).sum()
-        st.metric("High Risk", high, f"{high/len(df_plot)*100:.1f}%", delta_color="inverse")
-
-    fig, ax = plt.subplots(figsize=(9, 4))
+    fig, ax = plt.subplots(figsize=(10, 4))
     df_plot["Lifestyle_Risk"].hist(bins=12, ax=ax, edgecolor="black")
-    ax.set_xlabel("Lifestyle Risk Score")
-    ax.set_ylabel("Number of Students")
+    ax.set_xlabel("Lifestyle Risk Score", fontsize=11, fontweight="bold")
+    ax.set_ylabel("Number of Students", fontsize=11, fontweight="bold")
     ax.grid(axis="y", alpha=0.3)
     plt.tight_layout()
     st.pyplot(fig)
 
-    st.info(
-        """
-        **Lifestyle Risk Score**
-        - Device usage (Often/Always): +2 to +3
-        - Caffeine (Often/Always): +2 to +3
-        - Lack of exercise (Never/Rarely): +2
-        - High stress: +2 to +3
-        
-        **Interpretation**
-        - 0–3: Low risk
-        - 4–6: Moderate risk
-        - 7+: High risk
-        """
+    st.caption("Figure C5. Distribution of combined lifestyle risk score based on device use, caffeine, inactivity, and stress.")
+
+    high_risk = (df_plot["Lifestyle_Risk"] > 6).sum()
+    st.markdown(
+        f"""
+**Interpretation (C5).** The lifestyle risk score aggregates multiple behaviours that can jointly worsen sleep. In this dataset, **{high_risk} students ({_pct(high_risk, total):.1f}%)**
+fall into the high-risk range (>6), indicating concurrent exposure to several adverse factors (e.g., frequent device use, high caffeine intake, inactivity, and high stress).
+This supports a multi-component intervention approach rather than targeting only one behaviour.
+"""
     )
 
-    with st.expander("💡 Lifestyle Recommendations", expanded=True):
+    st.markdown("---")
+
+    with st.expander("💡 Lifestyle Recommendations", expanded=False):
         st.markdown(
             """
-            ### Lifestyle Changes to Improve Sleep
-            
-            - Stop screen time 1 hour before bed
-            - Avoid caffeine after 2 PM
-            - Exercise regularly (20–30 minutes daily)
-            - Stress management: breathing, meditation, counselling
-            """
+- Implement a “digital curfew” 60 minutes before bedtime.
+- Avoid caffeine after 2 PM (or 6+ hours before sleep).
+- Add moderate activity (20–30 minutes daily).
+- Apply stress strategies (breathing, planning, counselling).
+"""
         )
 
 
