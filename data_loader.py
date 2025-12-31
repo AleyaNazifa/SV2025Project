@@ -5,49 +5,64 @@ from datetime import datetime
 # Google Sheets published CSV URL
 GOOGLE_SHEETS_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSf4umx6QNDel99If8P2otizAHj7jEDxFIsqandbD0zYVzfDheZo2YVkK1_zknpDKjHnBuYWCINgcCe/pub?output=csv"
 
-@st.cache_data(ttl=300)  # Cache for 5 minutes
+@st.cache_data(ttl=300)
 def load_data():
     """Load data from Google Sheets with automatic refresh"""
     try:
         df = pd.read_csv(GOOGLE_SHEETS_URL)
-        
-        # Rename columns for easier access
+
+        # ✅ Clean headers: strip + collapse multiple spaces
+        df.columns = [str(c).strip() for c in df.columns]
+        df.columns = [" ".join(c.split()) for c in df.columns]
+
+        # ✅ Build mapping (also normalized)
         column_mapping = {
-            'Timestamp': 'Timestamp',
-            'What is your gender?': 'Gender',
-            'What is your age group?': 'AgeGroup',
-            'What is your year of study?': 'YearOfStudy',
-            'Which faculty are you currently enrolled in?': 'Faculty',
-            'How often do you have difficulty falling asleep at night?': 'DifficultyFallingAsleep',
-            'On average, how many hours of sleep do you get on a typical day?': 'SleepHours',
-            'How often do you wake up during the night and have trouble falling back asleep?': 'NightWakeups',
-            'How would you rate the overall quality of your sleep?': 'SleepQuality',
-            'At what time do you usually go to bed on weekdays?': 'BedTime',
-            'Do you usually nap during the day?': 'DayNap',
-            'How often do you experience difficulty concentrating during lectures or studying due to lack of sleep?': 'ConcentrationDifficulty',
-            'How often do you feel fatigued during the day, affecting your ability to study or attend classes?': 'DaytimeFatigue',
-            'How often do you miss or skip classes due to sleep-related issues (e.g., insomnia, feeling tired)?': 'MissedClasses',
-            'How would you describe the impact of insufficient sleep on your ability to complete assignments and meet deadlines?': 'AssignmentImpact',
-            'During exam periods, how much does your sleep pattern change?': 'ExamSleepChange',
-            'How would you rate your overall academic performance (GPA or grades) in the past semester?': 'AcademicPerformance',
-            'What is your GPA range for the most recent semester?': 'GPA',
-            'What is your CGPA range for the most recent semester?': 'CGPA',
-            'How often do you use electronic devices (e.g., phone, computer) before going to sleep?': 'DeviceUsage',
-            'How often do you consume caffeine (coffee, energy drinks) to stay awake or alert?': 'CaffeineConsumption',
-            'How often do you engage in physical activity or exercise?': 'PhysicalActivity',
-            'How would you describe your stress levels related to academic workload?': 'StressLevel',
-            'Do you use any methods to help you sleep?': 'SleepMethods'
+            "Timestamp": "Timestamp",
+            "What is your gender?": "Gender",
+            "What is your age group?": "AgeGroup",
+            "What is your year of study?": "YearOfStudy",
+            "Which faculty are you currently enrolled in?": "Faculty",
+            "How often do you have difficulty falling asleep at night?": "DifficultyFallingAsleep",
+            "On average, how many hours of sleep do you get on a typical day?": "SleepHours",
+            "How often do you wake up during the night and have trouble falling back asleep?": "NightWakeups",
+            "How would you rate the overall quality of your sleep?": "SleepQuality",
+            "At what time do you usually go to bed on weekdays?": "BedTime",
+            "Do you usually nap during the day?": "DayNap",
+            "How often do you experience difficulty concentrating during lectures or studying due to lack of sleep?": "ConcentrationDifficulty",
+            "How often do you feel fatigued during the day, affecting your ability to study or attend classes?": "DaytimeFatigue",
+            "How often do you miss or skip classes due to sleep-related issues (e.g., insomnia, feeling tired)?": "MissedClasses",
+            "How would you describe the impact of insufficient sleep on your ability to complete assignments and meet deadlines?": "AssignmentImpact",
+            "During exam periods, how much does your sleep pattern change?": "ExamSleepChange",
+            "How would you rate your overall academic performance (GPA or grades) in the past semester?": "AcademicPerformance",
+            "What is your GPA range for the most recent semester?": "GPA",
+            "What is your CGPA range for the most recent semester?": "CGPA",
+            "How often do you use electronic devices (e.g., phone, computer) before going to sleep?": "DeviceUsage",
+            "How often do you consume caffeine (coffee, energy drinks) to stay awake or alert?": "CaffeineConsumption",
+            "How often do you engage in physical activity or exercise?": "PhysicalActivity",
+            "How would you describe your stress levels related to academic workload?": "StressLevel",
+            "Do you use any methods to help you sleep?": "SleepMethods",
         }
-        
-        df = df.rename(columns=column_mapping)
-        
-        # Convert timestamp to datetime
-        df['Timestamp'] = pd.to_datetime(df['Timestamp'])
-        
-        # Calculate Insomnia Severity Index (ISI) score
-        df['InsomniaSeverity_index'] = calculate_insomnia_index(df)
-        
+
+        # ✅ Rename only keys that actually exist (prevents KeyError)
+        column_mapping_clean = {" ".join(k.split()): v for k, v in column_mapping.items()}
+        existing_map = {k: v for k, v in column_mapping_clean.items() if k in df.columns}
+        df = df.rename(columns=existing_map)
+
+        # Convert timestamp to datetime (safe)
+        if "Timestamp" in df.columns:
+            df["Timestamp"] = pd.to_datetime(df["Timestamp"], errors="coerce")
+
+        # ✅ Compute InsomniaSeverity_index only if needed cols exist
+        required = {"DifficultyFallingAsleep", "SleepQuality", "NightWakeups"}
+        if required.issubset(df.columns):
+            df["InsomniaSeverity_index"] = calculate_insomnia_index(df)
+        else:
+            missing = sorted(list(required - set(df.columns)))
+            st.warning(f"Cannot compute InsomniaSeverity_index. Missing columns: {missing}")
+            st.info(f"Available columns: {df.columns.tolist()}")
+
         return df
+
     except Exception as e:
         st.error(f"Error loading data: {e}")
         return None
