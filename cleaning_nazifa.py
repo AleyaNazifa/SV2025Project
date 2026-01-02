@@ -7,8 +7,15 @@ import re
 # Helpers
 # -----------------------------
 def _norm_col(col: str) -> str:
-    """Normalize header text to handle extra spaces/newlines from Google Forms."""
-    return " ".join(str(col).replace("\n", " ").replace("\t", " ").split()).strip()
+    """
+    Normalize header text robustly:
+    - handles trailing spaces, multiple spaces, newlines/tabs
+    - handles non-breaking spaces from Google Sheets/Forms
+    """
+    s = str(col).replace("\u00A0", " ")
+    s = s.replace("\n", " ").replace("\t", " ")
+    s = re.sub(r"\s+", " ", s).strip()
+    return s
 
 
 def _sleep_hours_to_est(val) -> float:
@@ -65,14 +72,9 @@ def _calculate_isi_like(df: pd.DataFrame) -> pd.Series:
 
     score = pd.Series(0.0, index=df.index)
 
-    if "DifficultyFallingAsleep" in df.columns:
-        score += df["DifficultyFallingAsleep"].astype(str).map(freq_map).fillna(0)
-
-    if "NightWakeups" in df.columns:
-        score += df["NightWakeups"].astype(str).map(freq_map).fillna(0)
-
-    if "SleepQuality" in df.columns:
-        score += df["SleepQuality"].astype(str).map(quality_points).fillna(0)
+    score += df["DifficultyFallingAsleep"].astype(str).map(freq_map).fillna(0)
+    score += df["NightWakeups"].astype(str).map(freq_map).fillna(0)
+    score += df["SleepQuality"].astype(str).map(quality_points).fillna(0)
 
     return (score / 12.0 * 28.0).round(1)
 
@@ -97,7 +99,7 @@ def prepare_nazifa_data(df: pd.DataFrame) -> pd.DataFrame:
     Prepare cleaned dataframe for Nazifa (Sleep Patterns page).
 
     Accepts:
-      - raw Google Forms dataframe (long question headers, often with trailing spaces), OR
+      - raw Google Forms dataframe (long question headers w/ spaces), OR
       - dataframe already renamed by data_loader.py (short column names)
 
     Returns:
@@ -108,11 +110,10 @@ def prepare_nazifa_data(df: pd.DataFrame) -> pd.DataFrame:
 
     out = df.copy()
 
-    # Normalize headers (critical for your trailing-space issue)
+    # Normalize headers
     out.columns = [_norm_col(c) for c in out.columns]
 
     # Rename long Google Form questions -> short names (only if short names missing)
-    # This is safe even if data_loader already renamed; we check presence.
     rename_candidates = {
         "Timestamp": "Timestamp",
         "What is your gender?": "Gender",
@@ -127,13 +128,11 @@ def prepare_nazifa_data(df: pd.DataFrame) -> pd.DataFrame:
         "Do you usually nap during the day?": "DayNap",
     }
 
-    # Build rename dict only for columns that exist AND aren't already in short form
     rename_dict = {}
-    short_targets = set(rename_candidates.values())
     for long_name, short_name in rename_candidates.items():
-        long_name_n = _norm_col(long_name)
-        if short_name not in out.columns and long_name_n in out.columns:
-            rename_dict[long_name_n] = short_name
+        long_key = _norm_col(long_name)
+        if short_name not in out.columns and long_key in out.columns:
+            rename_dict[long_key] = short_name
 
     if rename_dict:
         out = out.rename(columns=rename_dict)
@@ -154,7 +153,7 @@ def prepare_nazifa_data(df: pd.DataFrame) -> pd.DataFrame:
     else:
         out["SleepQuality_num"] = np.nan
 
-    # SleepDurationCategory
+    # SleepDurationCategory (Nazifa Figure A2)
     out["SleepDurationCategory"] = pd.cut(
         out["SleepHours_est"],
         bins=[-np.inf, 5.99, 8.0, np.inf],
@@ -182,8 +181,9 @@ def prepare_nazifa_data(df: pd.DataFrame) -> pd.DataFrame:
     else:
         out["FrequentNightWakeups"] = False
 
-    # ISI-like index + category (safe if inputs missing)
-    if all(c in out.columns for c in ["DifficultyFallingAsleep", "NightWakeups", "SleepQuality"]):
+    # ISI-like index + category
+    required = {"DifficultyFallingAsleep", "NightWakeups", "SleepQuality"}
+    if required.issubset(out.columns):
         out["InsomniaSeverity_index"] = _calculate_isi_like(out)
     else:
         out["InsomniaSeverity_index"] = np.nan
