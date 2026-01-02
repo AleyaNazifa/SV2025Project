@@ -3,24 +3,43 @@ import pandas as pd
 import numpy as np
 import re
 
-# Your published Google Sheet CSV (keep yours)
-GOOGLE_SHEETS_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSf4umx6QNDel99If8P2otizAHj7jEDxFIsqandbD0zYVzfDheZo2YVkK1_zknpDKjHnBuYWCINgcCe/pub?output=csv"
+# ============================================================
+# Google Sheets (Published CSV)
+# ============================================================
+GOOGLE_SHEETS_URL = (
+    "https://docs.google.com/spreadsheets/d/e/"
+    "2PACX-1vSf4umx6QNDel99If8P2otizAHj7jEDxFIsqandbD0zYVzfDheZo2YVkK1_zknpDKjHnBuYWCINgcCe"
+    "/pub?output=csv"
+)
+
+# ============================================================
+# Helpers: Column normalization
+# ============================================================
+def _norm_header(s: str) -> str:
+    """
+    Normalize Google Form headers:
+    - remove trailing / repeated spaces
+    - remove newlines / tabs
+    - handle non-breaking spaces
+    """
+    s = str(s).replace("\u00A0", " ")
+    s = s.replace("\n", " ").replace("\t", " ")
+    s = re.sub(r"\s+", " ", s).strip()
+    return s
 
 
 def _clean_columns(df: pd.DataFrame) -> pd.DataFrame:
-    # Fix whitespace issues in headers (your sheet has trailing spaces)
-    df.columns = [str(c).strip() for c in df.columns]
+    df.columns = [_norm_header(c) for c in df.columns]
     return df
 
 
-def _sleep_hours_to_estimate(x: str) -> float:
-    """
-    Convert categories like:
-    - '7–8 hours' -> 7.5
-    - '5–6 hours' -> 5.5
-    - 'More than 8 hours' -> 8.5
-    - 'Less than 4 hours' -> 3.5
-    """
+# ============================================================
+# Helpers: Feature engineering (shared, light)
+# ============================================================
+def _sleep_hours_to_estimate(x) -> float:
+    if pd.isna(x):
+        return np.nan
+
     s = str(x).strip().lower().replace("–", "-")
 
     if "more than" in s:
@@ -40,7 +59,7 @@ def _sleep_hours_to_estimate(x: str) -> float:
     return np.nan
 
 
-def _map_frequency_to_score(x: str) -> int:
+def _map_frequency_to_score(x) -> int:
     mapping = {
         "Never": 0,
         "Rarely (1–2 times a week)": 1,
@@ -55,44 +74,42 @@ def _map_frequency_to_score(x: str) -> int:
 
 
 def _calculate_isi(df: pd.DataFrame) -> pd.Series:
-    # A simple ISI-like index (0–28) based on key indicators
+    """
+    Simple ISI-like score (0–28):
+    - Difficulty falling asleep
+    - Night wakeups
+    - Inverted sleep quality
+    """
     diff = df["DifficultyFallingAsleep"].astype(str).map(_map_frequency_to_score).fillna(0)
     wake = df["NightWakeups"].astype(str).map(_map_frequency_to_score).fillna(0)
 
-    # SleepQuality is 1..5 where 1=poor, 5=excellent → invert to risk
-    # quality_risk: 5->0, 4->1, 3->2, 2->3, 1->4
     q = pd.to_numeric(df["SleepQuality"], errors="coerce")
     quality_risk = (5 - q).clip(lower=0, upper=4).fillna(0)
 
-    raw = diff + wake + quality_risk  # 0..12
-    isi = (raw / 12 * 28).round(1)    # scale to 0..28
-    return isi
+    raw = diff + wake + quality_risk  # 0–12
+    return (raw / 12 * 28).round(1)
 
 
 def _calculate_lifestyle_risk(df: pd.DataFrame) -> pd.Series:
-    def row_risk(row) -> int:
+    def row_risk(row):
         risk = 0
 
-        device = str(row.get("DeviceUsage", ""))
-        if "Always" in device:
+        if "Always" in str(row.get("DeviceUsage", "")):
             risk += 3
-        elif "Often" in device:
+        elif "Often" in str(row.get("DeviceUsage", "")):
             risk += 2
 
-        caff = str(row.get("CaffeineConsumption", ""))
-        if "Always" in caff:
+        if "Always" in str(row.get("CaffeineConsumption", "")):
             risk += 3
-        elif "Often" in caff:
+        elif "Often" in str(row.get("CaffeineConsumption", "")):
             risk += 2
 
-        activity = str(row.get("PhysicalActivity", ""))
-        if ("Never" in activity) or ("Rarely" in activity):
+        if any(x in str(row.get("PhysicalActivity", "")) for x in ["Never", "Rarely"]):
             risk += 2
 
-        stress = str(row.get("StressLevel", ""))
-        if "Extremely" in stress:
+        if "Extremely" in str(row.get("StressLevel", "")):
             risk += 3
-        elif "High" in stress:
+        elif "High" in str(row.get("StressLevel", "")):
             risk += 2
 
         return risk
@@ -100,12 +117,15 @@ def _calculate_lifestyle_risk(df: pd.DataFrame) -> pd.Series:
     return df.apply(row_risk, axis=1)
 
 
+# ============================================================
+# Main loader (AUTO-REFRESH)
+# ============================================================
 @st.cache_data(ttl=300)
 def load_data() -> pd.DataFrame:
     df = pd.read_csv(GOOGLE_SHEETS_URL)
     df = _clean_columns(df)
 
-    # Robust rename (after stripping)
+    # ---------- Robust rename ----------
     col_map = {
         "Timestamp": "Timestamp",
         "What is your gender?": "Gender",
@@ -133,26 +153,23 @@ def load_data() -> pd.DataFrame:
         "Do you use any methods to help you sleep?": "SleepMethods",
     }
 
-    # Apply rename for columns that exist (safe)
-    df = df.rename(columns={k: v for k, v in col_map.items() if k in df.columns})
+    col_map_norm = {_norm_header(k): v for k, v in col_map.items()}
+    df = df.rename(columns={c: col_map_norm[c] for c in df.columns if c in col_map_norm})
 
-    # Parse timestamp safely
+    # ---------- Timestamp ----------
     if "Timestamp" in df.columns:
         df["Timestamp"] = pd.to_datetime(df["Timestamp"], errors="coerce")
 
-    # Derived numeric columns used by Plotly pages
+    # ---------- Shared derived columns ----------
     if "SleepHours" in df.columns:
         df["SleepHours_est"] = df["SleepHours"].map(_sleep_hours_to_estimate)
 
-    # Compute indices if core columns exist
-    required_for_isi = {"DifficultyFallingAsleep", "NightWakeups", "SleepQuality"}
-    if required_for_isi.issubset(df.columns):
+    if {"DifficultyFallingAsleep", "NightWakeups", "SleepQuality"}.issubset(df.columns):
         df["InsomniaSeverity_index"] = _calculate_isi(df)
     else:
         df["InsomniaSeverity_index"] = np.nan
 
-    required_for_risk = {"DeviceUsage", "CaffeineConsumption", "PhysicalActivity", "StressLevel"}
-    if required_for_risk.issubset(df.columns):
+    if {"DeviceUsage", "CaffeineConsumption", "PhysicalActivity", "StressLevel"}.issubset(df.columns):
         df["Lifestyle_Risk"] = _calculate_lifestyle_risk(df)
     else:
         df["Lifestyle_Risk"] = 0
@@ -160,14 +177,15 @@ def load_data() -> pd.DataFrame:
     return df
 
 
+# ============================================================
+# Sidebar helpers
+# ============================================================
 def get_data_info(df: pd.DataFrame) -> dict:
     return {
-        "total_responses": int(len(df)),
+        "total_responses": len(df),
         "last_updated": df["Timestamp"].max() if "Timestamp" in df.columns else None,
-        "faculties": int(df["Faculty"].nunique()) if "Faculty" in df.columns else 0,
-        "avg_isi": float(pd.to_numeric(df["InsomniaSeverity_index"], errors="coerce").mean())
-        if "InsomniaSeverity_index" in df.columns
-        else float("nan"),
+        "faculties": df["Faculty"].nunique() if "Faculty" in df.columns else 0,
+        "avg_isi": pd.to_numeric(df["InsomniaSeverity_index"], errors="coerce").mean(),
     }
 
 
@@ -179,31 +197,33 @@ def display_sidebar_info():
 
     df = st.session_state.data
     if df is None or len(df) == 0:
-        st.sidebar.error("❌ Failed to load data.")
-        if st.sidebar.button("🔄 Retry", use_container_width=True):
-            st.cache_data.clear()
-            st.session_state.data = load_data()
-            st.rerun()
+        st.sidebar.error("❌ Failed to load data")
         return
 
     info = get_data_info(df)
-    st.sidebar.success("✅ Data Loaded")
 
+    st.sidebar.success("✅ Data Loaded")
     st.sidebar.metric("Total Responses", info["total_responses"])
-    if info["last_updated"] is not None and pd.notna(info["last_updated"]):
-        st.sidebar.metric("Last Updated", info["last_updated"].strftime("%Y-%m-%d %H:%M"))
+
+    if info["last_updated"] is not None:
+        st.sidebar.metric(
+            "Last Updated",
+            info["last_updated"].strftime("%Y-%m-%d %H:%M")
+        )
+
     st.sidebar.metric("Faculties", info["faculties"])
     if not np.isnan(info["avg_isi"]):
         st.sidebar.metric("Avg ISI", f"{info['avg_isi']:.1f}")
 
     st.sidebar.caption("🔄 Auto-refresh every 5 minutes")
+
     if st.sidebar.button("🔄 Refresh Now", use_container_width=True):
         st.cache_data.clear()
         st.session_state.data = load_data()
         st.rerun()
 
 
-def get_df():
+def get_df() -> pd.DataFrame:
     if "data" not in st.session_state or st.session_state.data is None:
         st.session_state.data = load_data()
     return st.session_state.data
