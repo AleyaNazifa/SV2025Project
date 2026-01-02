@@ -76,36 +76,36 @@ def render():
     # Figure A1 — Sleep Duration Distribution
     # =========================
     card("Figure A1 — Sleep Duration (Estimated Hours)")
-    fig = px.histogram(df, x="SleepHours_est", nbins=8, color_discrete_sequence=[ACCENT])
-    fig = style(fig, "Sleep Duration Distribution", "Hours of Sleep (Estimated)", "Number of Students")
-    st.plotly_chart(fig, use_container_width=True)
-    caption("Figure A1. Histogram of estimated sleep duration (hours).")
 
-    short = (df["SleepDurationCategory"] == "Short (<6h)").sum() if "SleepDurationCategory" in df.columns else 0
-    interp(
-        f"The histogram indicates that {short} students ({pct(short,total):.1f}%) are short sleepers (<6 hours). "
-        "A noticeable short-sleep subgroup suggests potential sleep deprivation, which is commonly linked to reduced attention, poorer memory consolidation, and decreased learning efficiency."
-    )
+    if "SleepHours_est" in df.columns:
+        fig = px.histogram(df, x="SleepHours_est", nbins=8, color_discrete_sequence=[ACCENT])
+        fig = style(fig, "Sleep Duration Distribution", "Hours of Sleep (Estimated)", "Number of Students")
+        st.plotly_chart(fig, use_container_width=True)
+        caption("Figure A1. Histogram of estimated sleep duration (hours).")
+
+        short = df["SleepDurationCategory"].astype(str).eq("Short (<6h)").sum() if "SleepDurationCategory" in df.columns else 0
+        interp(
+            f"The histogram indicates that {short} students ({pct(short,total):.1f}%) are short sleepers (<6 hours). "
+            "A noticeable short-sleep subgroup suggests potential sleep deprivation, which is commonly linked to reduced attention, poorer memory consolidation, and decreased learning efficiency."
+        )
+    else:
+        st.warning("SleepHours_est is missing. Please verify Nazifa cleaning module.")
     end_card()
 
     # =========================
-    # Figure A2 — Sleep Duration Categories (REPLACEMENT)
+    # Figure A2 — Sleep Duration Categories (Short / Adequate / Long)
     # =========================
     card("Figure A2 — Sleep Duration Categories (Short / Adequate / Long)")
     cat_order = ["Short (<6h)", "Adequate (6–8h)", "Long (>8h)"]
 
     if "SleepDurationCategory" in df.columns:
-        cat_counts = (
-            df["SleepDurationCategory"]
-            .astype(str)
-            .value_counts()
-            .reindex(cat_order, fill_value=0)
-            .reset_index()
-        )
-        cat_counts.columns = ["Category", "Count"]
+        cat_series = df["SleepDurationCategory"].astype(str)
+        cat_counts = cat_series.value_counts().reindex(cat_order, fill_value=0)
+
+        cat_df = pd.DataFrame({"Category": cat_counts.index, "Count": cat_counts.values})
 
         fig = px.bar(
-            cat_counts,
+            cat_df,
             x="Category",
             y="Count",
             text="Count",
@@ -117,7 +117,7 @@ def render():
 
         caption("Figure A2. Distribution of respondents across sleep duration categories (short, adequate, long).")
 
-        short_n = int(cat_counts.loc[cat_counts["Category"] == "Short (<6h)", "Count"].values[0])
+        short_n = int(cat_counts.get("Short (<6h)", 0))
         interp(
             f"The category breakdown shows the proportion of students who are short, adequate, or long sleepers. "
             f"Short sleepers account for {short_n} students ({pct(short_n,total):.1f}%), representing a subgroup that may be more vulnerable to insomnia symptoms, daytime fatigue, and reduced academic alertness."
@@ -131,25 +131,28 @@ def render():
     # =========================
     card("Figure A3 — Weekday Bedtime Distribution")
 
-    tmp = df.copy()
-    if "BedTime_order" in tmp.columns:
-        tmp = tmp.sort_values("BedTime_order")
+    if "BedTime" in df.columns:
+        tmp = df.copy()
+        if "BedTime_order" in tmp.columns:
+            tmp = tmp.sort_values("BedTime_order")
 
-    fig = px.pie(
-        tmp,
-        names="BedTime",
-        hole=0.45,
-        color_discrete_sequence=["#64748B", ACCENT, "#0EA5E9", "#F59E0B", "#EF4444"],
-    )
-    fig = style(fig, "Bedtime Distribution (Weekdays)")
-    st.plotly_chart(fig, use_container_width=True)
-    caption("Figure A3. Donut chart of reported weekday bedtime categories.")
+        fig = px.pie(
+            tmp,
+            names="BedTime",
+            hole=0.45,
+            color_discrete_sequence=["#64748B", ACCENT, "#0EA5E9", "#F59E0B", "#EF4444"],
+        )
+        fig = style(fig, "Bedtime Distribution (Weekdays)")
+        st.plotly_chart(fig, use_container_width=True)
+        caption("Figure A3. Donut chart of reported weekday bedtime categories.")
 
-    late = df["BedTime"].astype(str).str.contains("After 12 AM", na=False).sum() if "BedTime" in df.columns else 0
-    interp(
-        f"{late} students ({pct(late,total):.1f}%) report sleeping after midnight. "
-        "Late bedtimes can reduce sleep opportunity when wake-up times are fixed for classes, increasing the risk of fatigue and insomnia-related complaints."
-    )
+        late = df["BedTime"].astype(str).str.contains("After 12 AM", na=False).sum()
+        interp(
+            f"{late} students ({pct(late,total):.1f}%) report sleeping after midnight. "
+            "Late bedtimes can reduce sleep opportunity when wake-up times are fixed for classes, increasing the risk of fatigue and insomnia-related complaints."
+        )
+    else:
+        st.warning("BedTime is missing. Please verify Nazifa cleaning module.")
     end_card()
 
     # =========================
@@ -157,22 +160,25 @@ def render():
     # =========================
     card("Figure A4 — Sleep Quality by Bedtime")
 
-    fig = px.violin(
-        df,
-        x="BedTime",
-        y="SleepQuality_num",
-        box=True,
-        points=False,
-        color_discrete_sequence=[ACCENT],
-    )
-    fig = style(fig, "Sleep Quality Across Bedtime Categories", "Bedtime Category", "Sleep Quality (1=Poor, 5=Excellent)")
-    st.plotly_chart(fig, use_container_width=True)
-    caption("Figure A4. Violin plot showing sleep quality ratings across bedtime categories.")
+    if "BedTime" in df.columns and "SleepQuality_num" in df.columns:
+        fig = px.violin(
+            df,
+            x="BedTime",
+            y="SleepQuality_num",
+            box=True,
+            points=False,
+            color_discrete_sequence=[ACCENT],
+        )
+        fig = style(fig, "Sleep Quality Across Bedtime Categories", "Bedtime Category", "Sleep Quality (1=Poor, 5=Excellent)")
+        st.plotly_chart(fig, use_container_width=True)
+        caption("Figure A4. Violin plot showing sleep quality ratings across bedtime categories.")
 
-    interp(
-        "Sleep quality varies across bedtime groups, and later bedtime categories often show lower perceived quality and wider variability. "
-        "This pattern supports sleep hygiene recommendations promoting consistent and earlier bedtimes to improve restorative sleep."
-    )
+        interp(
+            "Sleep quality varies across bedtime groups, and later bedtime categories often show lower perceived quality and wider variability. "
+            "This pattern supports sleep hygiene recommendations promoting consistent and earlier bedtimes to improve restorative sleep."
+        )
+    else:
+        st.warning("BedTime or SleepQuality_num is missing. Please verify Nazifa cleaning module.")
     end_card()
 
     # =========================
@@ -180,20 +186,24 @@ def render():
     # =========================
     card("Figure A5 — Co-occurrence of Insomnia Symptoms")
 
-    heat = pd.crosstab(df["DifficultyFallingAsleep"], df["NightWakeups"])
-    fig = px.imshow(heat, text_auto=True, color_continuous_scale=["#ECFEFF", ACCENT])
-    fig = style(fig, "Difficulty Falling Asleep vs Night Wakeups")
-    st.plotly_chart(fig, use_container_width=True)
-    caption("Figure A5. Heatmap showing co-occurrence between difficulty initiating sleep and night awakenings.")
+    if "DifficultyFallingAsleep" in df.columns and "NightWakeups" in df.columns:
+        heat = pd.crosstab(df["DifficultyFallingAsleep"], df["NightWakeups"])
 
-    both = 0
-    if "FrequentDifficultyFallingAsleep" in df.columns and "FrequentNightWakeups" in df.columns:
-        both = (df["FrequentDifficultyFallingAsleep"] & df["FrequentNightWakeups"]).sum()
+        fig = px.imshow(heat, text_auto=True, color_continuous_scale=["#ECFEFF", ACCENT])
+        fig = style(fig, "Difficulty Falling Asleep vs Night Wakeups")
+        st.plotly_chart(fig, use_container_width=True)
+        caption("Figure A5. Heatmap showing co-occurrence between difficulty initiating sleep and night awakenings.")
 
-    interp(
-        f"The heatmap indicates that insomnia symptoms frequently overlap; {both} students ({pct(both,total):.1f}%) report frequent difficulty falling asleep together with frequent night awakenings. "
-        "Co-occurring symptoms often reflect more severe sleep disruption than isolated problems, suggesting a subgroup that may benefit from targeted sleep interventions."
-    )
+        both = 0
+        if "FrequentDifficultyFallingAsleep" in df.columns and "FrequentNightWakeups" in df.columns:
+            both = int((df["FrequentDifficultyFallingAsleep"] & df["FrequentNightWakeups"]).sum())
+
+        interp(
+            f"The heatmap indicates that insomnia symptoms frequently overlap; {both} students ({pct(both,total):.1f}%) report frequent difficulty falling asleep together with frequent night awakenings. "
+            "Co-occurring symptoms often reflect more severe sleep disruption than isolated problems, suggesting a subgroup that may benefit from targeted sleep interventions."
+        )
+    else:
+        st.warning("DifficultyFallingAsleep or NightWakeups is missing. Please verify Nazifa cleaning module.")
     end_card()
 
 
