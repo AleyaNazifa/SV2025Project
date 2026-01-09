@@ -66,10 +66,30 @@ def render():
         else 0.0
     )
 
-    col1.metric("🧠 Concentration Difficulty", f"{focus_risk:.1f}%")
-    col2.metric("😫 Severe Academic Fatigue", f"{fatigue_risk:.1f}%")
-    col3.metric("📉 Academic Performance Level", perf_level)
-    col4.metric("📝 Assignment Performance Risk", f"{assign_risk:.1f}%")
+    col1.metric(
+        label="🧠 Concentration Difficulty", 
+        value=f"{focus_risk:.1f}%",
+        help="Percentage of students with severe insomnia who report frequent difficulty concentrating",
+        border=True
+    )
+    col2.metric(
+        label="😫 Severe Academic Fatigue",
+        value=f"{fatigue_impact:.1f}%",
+        help="Percentage of students with severe insomnia experiencing frequent daytime fatigue",
+        border=True
+    )
+    col3.metric(
+        label="📉 Academic Performance Level",
+        value=perf_level,
+        help="Most frequently reported academic performance category among students with severe insomnia",
+        border=True
+    )
+    col4.metric(
+    label="📝 Assignment Performance Risk",
+    value=f"{assign_risk:.1f}%",
+    help="Percentage of students with severe insomnia reporting major or severe difficulty completing assignments",
+    border=True
+    )
 
     st.divider()
 
