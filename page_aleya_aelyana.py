@@ -46,7 +46,7 @@ def render():
     # Metrics: severe insomnia group
     # -----------------------------
     severe = df[df["Insomnia_Category"] == "Severe Insomnia"] if "Insomnia_Category" in df.columns else df
-
+    st.subheader("Key Findings: The Impact of Insomnia")
     col1, col2, col3, col4 = st.columns(4)
 
     focus_risk = (
