@@ -185,43 +185,10 @@ def render():
     else:
         st.warning("Missing columns for Chart 5.")
 
-    # -----------------------------
-    # CHART 6: Correlation Heatmap
-    # -----------------------------
-    corr_columns = [
-        "SleepHours_est",
-        "InsomniaSeverity_index",
-        "DaytimeFatigue_numeric",
-        "ConcentrationDifficulty_numeric",
-        "MissedClasses_numeric",
-        "AcademicPerformance_numeric",
-        "GPA_numeric",
-        "CGPA_numeric",
-    ]
-
-    existing_cols = [c for c in corr_columns if c in df.columns]
-    corr_matrix = df[existing_cols].corr()
-
-    fig6 = px.imshow(
-        corr_matrix,
-        text_auto=".2f",
-        aspect="auto",
-        color_continuous_scale="Sunset",
-        title="Correlation Heatmap: Sleep Issues vs Academic Outcomes",
-    )
-
-    st.plotly_chart(fig6, use_container_width=True)
-
-    st.caption(
-        "The heatmap shows strong positive correlations between insomnia severity, daytime fatigue, "
-        "and concentration difficulty, while negative correlations are observed with academic performance "
-        "and GPA indicators."
-    )
 
 render()
 
 
 
 
-
-
+THIS IS MY CURRENT CODE
