@@ -74,7 +74,7 @@ def render():
     )
     col2.metric(
         label="😫 Severe Academic Fatigue",
-        value=f"{fatigue_impact:.1f}%",
+        value=f"{fatigue_risk:.1f}%",
         help="Percentage of students with severe insomnia experiencing frequent daytime fatigue",
         border=True
     )
@@ -85,10 +85,10 @@ def render():
         border=True
     )
     col4.metric(
-    label="📝 Assignment Performance Risk",
-    value=f"{assign_risk:.1f}%",
-    help="Percentage of students with severe insomnia reporting major or severe difficulty completing assignments",
-    border=True
+        label="📝 Assignment Performance Risk",
+        value=f"{assign_risk:.1f}%",
+        help="Percentage of students with severe insomnia reporting major or severe difficulty completing assignments",
+        border=True
     )
 
     st.divider()
