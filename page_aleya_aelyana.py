@@ -210,6 +210,55 @@ def render():
     else:
         st.warning("Missing columns for Chart 5.")
 
+    # -----------------------------
+    # Chart 6: Correlation Heatmap
+    # -----------------------------
+    st.divider()
+    st.subheader("Correlation Analysis: Sleep Issues vs Academic Outcomes")
+
+    corr_columns = [
+        'SleepHours_est',
+        'InsomniaSeverity_index',
+        'DaytimeFatigue_numeric',
+        'ConcentrationDifficulty_numeric',
+        'MissedClasses_numeric',
+        'AcademicPerformance_numeric',
+        'GPA_numeric',
+        'CGPA_numeric'
+    ]
+
+    # Only keep columns that exist
+    existing_cols = [c for c in corr_columns if c in df.columns]
+
+    if len(existing_cols) >= 2:
+        corr_matrix = df[existing_cols].corr()
+
+        fig = px.imshow(
+            corr_matrix,
+            text_auto=".2f",
+            color_continuous_scale="RdBu_r",
+            zmin=-1,
+            zmax=1,
+            title="Correlation Heatmap: Sleep Issues vs. Academic Outcomes"
+        )
+
+        fig.update_layout(
+            height=600,
+            plot_bgcolor="rgba(0,0,0,0)",
+            paper_bgcolor="rgba(0,0,0,0)",
+            title_font_size=18
+        )
+
+        fig.update_xaxes(tickangle=45)
+
+        st.plotly_chart(fig, use_container_width=True)
+
+        st.caption(
+            "Positive values indicate a direct relationship, while negative values indicate an inverse relationship. "
+            "Stronger colors represent stronger correlations."
+        )
+    else:
+        st.warning("Not enough numeric variables available to generate correlation heatmap.")
 
 render()
 
