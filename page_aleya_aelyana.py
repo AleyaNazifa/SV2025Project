@@ -148,6 +148,16 @@ def render():
         )
         fig.update_layout(showlegend=False, plot_bgcolor="rgba(0,0,0,0)")
         st.plotly_chart(fig, use_container_width=True)
+        st.markdown("""
+        **Key Insights**
+        * As GPA decreases, the insomnia severity "box" shifts upward. Higher GPA is associated with more consistent and lower insomnia scores.
+        * GPA 3.70 - 4.00 category show lowest median insomnia score (4), placing these students in the "Low/No Insomnia" category.
+        * GPA 3.00 - 3.69 category show median score increases to 7. Interestingly, outliers reaching scores of 12-13 indicate that some students maintain good grades despite high insomnia.
+        * GPA 2.50 - 2.49 group show highest spread and maximum scores (reaching 14), indicating that this group experiences the strongest insomnia symptoms.
+
+        **Conclusion**
+        * Managing insomnia is a key factor in academic success. Students with the best grades tend to maintain the healthiest sleep profiles.
+        """)
         st.divider()
     else:
         st.warning("Missing columns for Chart 2.")
@@ -175,6 +185,15 @@ def render():
             labels={"Student_Count": "Number of Students"},
         )
         st.plotly_chart(fig, use_container_width=True)
+        st.markdown("""
+        **Key Insights**
+        * Low / No Insomnia: Even with good sleep, only 3 students reported "No impact," with most feeling at least a "Minor impact" (8) on their work.
+        * Moderate Insomnia: A large spike in "Moderate" (28) and "Major" (13) impacts, indicating that sleep issues are starting to damage the quality of their assignment.
+        * Severe Insomnia: Negative impact is the standard.16 out of 21 students are "Moderate" or "Major" impacted, with only 1 student reporting "No impact".
+
+        **Conclusion**
+        * The insomnia severity is directly correlates with academic disruption. As sleep health worsens, the ability to complete coursework effectively is significantly compromised.
+        """)
         st.divider()
     else:
         st.warning("Missing columns for Chart 3.")
@@ -201,6 +220,15 @@ def render():
             barmode="stack",
         )
         st.plotly_chart(fig, use_container_width=True)
+        st.markdown("""
+        **Key Insights**
+        * Low / No Insomnia: Most students feel energized, with "Rarely" (11) or "Never" (4) being the top responses.
+        * Moderate Insomnia: A big shift where "Sometimes" (37) becomes the norm. The appearance of "Always" fatigued students (3) shows moderate issues can still cause persistent fatigue.
+        * Severe Insomnia: Fatigue is nearly universal. 20 out of 21 students reported fatigue "Sometimes" to "Always".
+
+        **Conclusion**
+        * There is a progressive increase in fatigue associated with sleep health. Fatigue acts as a barrier that may drive the concentration and performance issues seen throughout this study.
+        """)
         st.divider()
     else:
         st.warning("Missing columns for Chart 4.")
@@ -222,6 +250,15 @@ def render():
         )
         fig.update_layout(showlegend=False, yaxis=dict(autorange="reversed"))
         st.plotly_chart(fig, use_container_width=True)
+        st.markdown("""
+        **Key Insights**
+        * Low/No Insomnia students feel the most confident, rating themselves between "Good" and "Very good".
+        * Moderate Insomnia causes ratings to spread out. The median remains "Good," but the range drops to "Average".
+        * Severe Insomnia shifts the entire box down to "Average" and "Good," with almost no representation of "Very good".
+
+        **Conclusion**
+        * Insomnia severity has a negative correlation with academic self perception. Severe insomnia acts as a "ceiling" that makes it harder to achieve or feel like a high achiever.
+        """)
     else:
         st.warning("Missing columns for Chart 5.")
 
