@@ -116,6 +116,16 @@ def render():
             labels={"Count": "Number of Students", "Insomnia_Category": "Insomnia Level"},
         )
         st.plotly_chart(fig, use_container_width=True)
+        st.markdown("""
+        **Key Insights**
+        * Most students (64) have moderate insomnia, with "Sometimes" (36 students) being the most common focus problem.
+        * Low / No Insomnia Group dominated by "Rarely" (9) and "Sometimes" (8) responses, serious disruptions ("Often"/"Always") are almost none.
+        * Severe Insomnia Group shows a concerning change which "Rarely" almost disappears (1 student), replaced by a sharp increase in "Often" and "Always".
+        * Zero (0) students reported "Never" experiencing concentration issues, proving that focus is a universal challenge, but it becomes chronic with poor sleep.
+
+        **Conclusion**
+        * There is a direct relationship between insomnia severity and difficulty maintaining focus. Severe insomnia doesn't just mean less sleep but it creates a high risk of academic failure due to ongoing cognitive impairment.
+        """)
         st.divider()
     else:
         st.warning("Missing columns for Chart 1.")
