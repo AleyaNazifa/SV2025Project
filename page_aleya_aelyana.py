@@ -306,10 +306,6 @@ def render():
 
         st.plotly_chart(fig, use_container_width=True)
 
-        st.caption(
-            "Positive values indicate a direct relationship, while negative values indicate an inverse relationship. "
-            "Stronger colors represent stronger correlations."
-        )
     else:
         st.warning("Not enough numeric variables available to generate correlation heatmap.")
 
