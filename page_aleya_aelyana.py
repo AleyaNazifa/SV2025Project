@@ -3,6 +3,9 @@ import pandas as pd
 import plotly.express as px
 import numpy as np
 
+from data_loader import display_sidebar_info, get_df
+from cleaning_aelyana import prepare_aelyana_data  # make sure this exists
+
 
 # ==========================================
 # 1. PAGE CONFIGURATION
