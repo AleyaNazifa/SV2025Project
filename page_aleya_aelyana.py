@@ -236,20 +236,21 @@ def render():
         fig = px.imshow(
             corr_matrix,
             text_auto=".2f",
+            aspect="auto",
             color_continuous_scale='SUNSET',
             zmin=-1,
             zmax=1,
             title="Correlation Heatmap: Sleep Issues vs. Academic Outcomes"
         )
 
-        fig.update_layout(
-            height=600,
-            plot_bgcolor="rgba(0,0,0,0)",
-            paper_bgcolor="rgba(0,0,0,0)",
-            title_font_size=18
-        )
+        #fig.update_layout(
+            #height=600,
+            #plot_bgcolor="rgba(0,0,0,0)",
+            #paper_bgcolor="rgba(0,0,0,0)",
+            #title_font_size=18
+        #)
 
-        fig.update_xaxes(tickangle=45)
+        #fig.update_xaxes(tickangle=45)
 
         st.plotly_chart(fig, use_container_width=True)
 
