@@ -111,6 +111,7 @@ def render():
             barmode="group",
             title="Concentration Difficulty by Insomnia Category",
             category_orders={"Insomnia_Category": insomnia_order, "ConcentrationDifficulty": freq_order},
+            color_discrete_sequence=px.colors.sequential.Sunset,
             labels={"Count": "Number of Students", "Insomnia_Category": "Insomnia Level"},
         )
         st.plotly_chart(fig, use_container_width=True)
@@ -130,6 +131,7 @@ def render():
             color="GPA",
             title="Insomnia Severity Index Across GPA Categories",
             category_orders={"GPA": gpa_order},
+            color_discrete_sequence=px.colors.sequential.Sunset,
             points="outliers",
         )
         fig.update_layout(showlegend=False, plot_bgcolor="rgba(0,0,0,0)")
@@ -155,6 +157,7 @@ def render():
             color="AssignmentImpact",
             title="Assignment Impact by Insomnia Category",
             category_orders={"Insomnia_Category": insomnia_order, "AssignmentImpact": impact_order},
+            color_discrete_sequence=px.colors.sequential.Sunset,
             barmode="stack",
             labels={"Student_Count": "Number of Students"},
         )
@@ -180,6 +183,7 @@ def render():
             color="DaytimeFatigue",
             title="Fatigue Level by Insomnia Severity",
             category_orders={"Insomnia_Category": insomnia_order, "DaytimeFatigue": freq_order},
+            color_discrete_sequence=px.colors.sequential.Sunset,
             barmode="stack",
         )
         st.plotly_chart(fig, use_container_width=True)
@@ -198,6 +202,7 @@ def render():
             color="Insomnia_Category",
             title="Academic Performance by Insomnia Severity",
             category_orders={"Insomnia_Category": insomnia_order, "AcademicPerformance": academic_order},
+            color_discrete_sequence=px.colors.sequential.Sunset,
             points="outliers",
         )
         fig.update_layout(showlegend=False, yaxis=dict(autorange="reversed"))
