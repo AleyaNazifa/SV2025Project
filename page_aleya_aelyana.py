@@ -187,3 +187,27 @@ def render():
 
 
 render()
+
+
+# --- CHART 6: Correlation Heatmap ---
+corr_columns = ['SleepHours_est', 'InsomniaSeverity_index', 'DaytimeFatigue_numeric', 'ConcentrationDifficulty_numeric', 'MissedClasses_numeric', 'AcademicPerformance_numeric', 'GPA_numeric', 'CGPA_numeric']
+existing_cols = [c for c in corr_columns if c in df.columns]
+corr_matrix = df[existing_cols].corr()
+
+fig7 = px.imshow(
+    corr_matrix, text_auto=".2f", aspect="auto",
+    color_continuous_scale='Sunset',
+    title="Correlation Heatmap: Sleep Issues vs. Academic Outcomes"
+)
+st.plotly_chart(fig7, use_container_width=True)
+
+st.markdown("""
+**Key Insights**
+* Sleep hours is moderately correlated with Academic Performance (0.32), but much weaker correlated with actual GPA (0.16) and CGPA (-0.02).
+* Fatigue and Concentration are strongly correlated (0.63). Insomnia Severity is also strongly correlated with Fatigue (0.54) and Concentration (0.38).
+* Skipping classes is more damaging to long-term grades (-0.14) than the feeling of being tired alone.
+* The small positive correlation (0.14) between sleep hours and fatigue suggests that getting more sleep doesn't always solve the problem.
+
+**Conclusion**
+* While sleep health determines student experience (fatigue/focus), its relationship to actual grades is complex. Success is more threatened by behavioral consequences (missing class) than just feeling tired.
+""")
