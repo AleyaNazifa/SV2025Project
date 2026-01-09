@@ -79,7 +79,7 @@ def render():
         border=True
     )
     col3.metric(
-        label="📉 Academic Performance Level",
+        label="📉 Most Common Academic Performance",
         value=perf_level,
         help="Most frequently reported academic performance category among students with severe insomnia",
         border=True
