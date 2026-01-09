@@ -30,12 +30,14 @@ def render():
     # ==========================================
     # 3. TYPE CONVERSION
     # ==========================================
-    df["AcademicPerformance"] = pd.Categorical(df["AcademicPerformance"], academic_order, ordered=True)
-    df["Insomnia_Category"] = pd.Categorical(df["Insomnia_Category"], insomnia_order, ordered=True)
-    df["ConcentrationDifficulty"] = pd.Categorical(df["ConcentrationDifficulty"], freq_order, ordered=True)
-    df["AssignmentImpact"] = pd.Categorical(df["AssignmentImpact"], impact_order, ordered=True)
-    df["DaytimeFatigue"] = pd.Categorical(df["DaytimeFatigue"], freq_order, ordered=True)
-
+    df['AcademicPerformance'] = pd.Categorical(df['AcademicPerformance'], categories=academic_order, ordered=True)
+    df['Insomnia_Category'] = pd.Categorical(df['Insomnia_Category'], categories=insomnia_order, ordered=True)
+    df['ConcentrationDifficulty'] = pd.Categorical(df['ConcentrationDifficulty'], categories=freq_order, ordered=True)
+    df['AssignmentImpact'] = pd.Categorical(df['AssignmentImpact'], categories=impact_order, ordered=True)
+    df['DaytimeFatigue'] = pd.Categorical(df['DaytimeFatigue'], categories=freq_order, ordered=True)
+    
+    return df, academic_order, insomnia_order, freq_order, impact_order
+    
     # ==========================================
     # 4. HEADER
     # ==========================================
@@ -52,27 +54,52 @@ def render():
 
     col1, col2, col3, col4 = st.columns(4)
 
-    col1.metric(
-        "🧠 Concentration Difficulty",
-        f"{(severe_df['ConcentrationDifficulty'].isin(['Often','Always']).mean()*100):.1f}%"
-    )
+# Filtering data to isolate the high-impact group for metrics
+severe_insomnia_df = df[df['Insomnia_Category'] == 'Severe Insomnia']
 
-    col2.metric(
-        "😫 Daytime Fatigue",
-        f"{(severe_df['DaytimeFatigue'].isin(['Often','Always']).mean()*100):.1f}%"
-    )
+# A. Focus Risk (Concentration Difficulty)
+focus_risk = (severe_insomnia_df['ConcentrationDifficulty'].isin(['Often', 'Always']).mean() * 100)
 
-    col3.metric(
-        "📉 Academic Performance",
-        severe_df["AcademicPerformance"].mode()[0] if not severe_df.empty else "N/A"
-    )
+# B. Fatigue Impact (Daytime Fatigue)
+fatigue_impact = (severe_insomnia_df['DaytimeFatigue'].isin(['Often', 'Always']).mean() * 100)
 
-    col4.metric(
-        "📝 Assignment Impact",
-        f"{(severe_df['AssignmentImpact'].isin(['Major impact','Severe impact']).mean()*100):.1f}%"
-    )
+# C. Performance Trend (Most common performance for Severe group)
+perf_impact = severe_insomnia_df['AcademicPerformance'].mode()[0] if not severe_insomnia_df.empty else "N/A"
 
-    st.divider()
+# D. Assignment Risk (Percentage reporting Major/Severe impact)
+assign_impact = (severe_insomnia_df['AssignmentImpact'].isin(['Major impact', 'Severe impact']).mean() * 100)
+
+# Display key academic impact metrics
+col1.metric(
+    label="🧠 Concentration Difficulty",
+    value=f"{focus_risk:.1f}%",
+    help="Percentage of students with severe insomnia who report frequent difficulty concentrating",
+    border=True
+)
+
+col2.metric(
+    label="😫 Severe Academic Fatigue",
+    value=f"{fatigue_impact:.1f}%",
+    help="Percentage of students with severe insomnia experiencing frequent daytime fatigue",
+    border=True
+)
+
+col3.metric(
+    label="📉 Academic Performance Level",
+    value=perf_impact,
+    help="Most frequently reported academic performance category among students with severe insomnia",
+    border=True
+)
+
+col4.metric(
+    label="📝 Assignment Performance Risk",
+    value=f"{assign_impact:.1f}%",
+    help="Percentage of students with severe insomnia reporting major or severe difficulty completing assignments",
+    border=True
+)
+
+st.divider()
+
 
     # ==========================================
     # 6. CHART 1 – CONCENTRATION
