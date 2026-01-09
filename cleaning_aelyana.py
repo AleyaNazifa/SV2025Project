@@ -1,172 +1,213 @@
-# streamlit_app.py
+from __future__ import annotations
 
-import streamlit as st
-import pandas as pd
+import re
 import numpy as np
-import matplotlib.pyplot as plt
-import seaborn as sns
+import pandas as pd
 
-sns.set(style="whitegrid")
 
-st.set_page_config(page_title="Insomnia & Education Survey Analysis", layout="wide")
-st.title("Insomnia and Educational Survey Outcomes among UMK Students")
+# -----------------------------
+# Helpers
+# -----------------------------
+def _norm_col(col: str) -> str:
+    """
+    Normalize header text robustly:
+    - handles trailing spaces, multiple spaces, newlines/tabs
+    - handles non-breaking spaces from Google Sheets/Forms
+    """
+    s = str(col).replace("\u00A0", " ")
+    s = s.replace("\n", " ").replace("\t", " ")
+    s = re.sub(r"\s+", " ", s).strip()
+    return s
 
-# =========================================================
-# 1. FILE UPLOAD
-# =========================================================
-st.header("Upload Your CSV File")
-uploaded_file = st.file_uploader("Choose a CSV file", type=["csv"])
 
-if uploaded_file:
-    try:
-        df = pd.read_csv(uploaded_file)
-        st.success("Data loaded successfully!")
-        st.subheader("Raw Data Preview")
-        st.dataframe(df.head())
-    except Exception as e:
-        st.error(f"Error loading data: {e}")
-else:
-    st.info("Please upload a CSV file to continue.")
+def _map_freq(x: object) -> int:
+    """
+    Frequency mapping (robust to minor wording differences).
+    Produces 0..4.
+    """
+    s = str(x).strip()
+    mapping = {
+        "Never": 0,
+        "Rarely (1–2 times a month)": 1,
+        "Rarely (1–2 times a week)": 1,
+        "Rarely (1-2 times a month)": 1,
+        "Rarely (1-2 times a week)": 1,
+        "Rarely": 1,
+        "Occasionally": 2,
+        "Sometimes (3–4 times a week)": 2,
+        "Sometimes (3-4 times a week)": 2,
+        "Sometimes": 2,
+        "Frequently": 3,
+        "Often (5–6 times a week)": 3,
+        "Often (5-6 times a week)": 3,
+        "Often": 3,
+        "Always (every night)": 4,
+        "Always": 4,
+    }
+    return mapping.get(s, 0)
 
-# =========================================================
-# 2. INITIAL DATA CHECKING
-# =========================================================
-if uploaded_file:
-    st.header("Data Quality Check")
-    
-    st.subheader("Missing Values per Column")
-    missing_values = df.isnull().sum()
-    st.dataframe(missing_values)
-    
-    st.subheader("Duplicate Rows")
-    duplicate_rows = df[df.duplicated()]
-    st.write(f"Number of duplicate rows: {len(duplicate_rows)}")
-    if not duplicate_rows.empty:
-        st.dataframe(duplicate_rows.head())
+
+def _sleep_hours_to_est(val: object) -> float:
+    """
+    Convert sleep duration response to numeric estimate (hours).
+    Handles your dataset variants.
+    """
+    if pd.isna(val):
+        return np.nan
+
+    x = str(val).strip()
+
+    mapping = {
+        "Less than 4 hours": 3.5,
+        "Less than 5 hours": 4.5,
+        "4–5 hours": 4.5,
+        "4-5 hours": 4.5,
+        "5–6 hours": 5.5,
+        "5-6 hours": 5.5,
+        "6–7 hours": 6.5,
+        "6-7 hours": 6.5,
+        "7–8 hours": 7.5,
+        "7-8 hours": 7.5,
+        "8–9 hours": 8.5,
+        "8-9 hours": 8.5,
+        "More than 8 hours": 9.0,
+        "9 or more hours": 9.0,
+    }
+    if x in mapping:
+        return float(mapping[x])
+
+    # fallback: parse numbers and average
+    nums = re.findall(r"\d+\.?\d*", x.replace("–", "-"))
+    if len(nums) == 1:
+        return float(nums[0])
+    if len(nums) >= 2:
+        return (float(nums[0]) + float(nums[1])) / 2.0
+
+    return np.nan
+
+
+def _categorize_insomnia(score: float) -> str | float:
+    if pd.isna(score):
+        return np.nan
+    if score <= 4:
+        return "Low / No Insomnia"
+    if score <= 8:
+        return "Moderate Insomnia"
+    return "Severe Insomnia"
+
+
+# -----------------------------
+# Main function used by Streamlit page
+# -----------------------------
+def prepare_aelyana_data(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Prepare cleaned dataframe for Aelyana (Academic Impact page).
+
+    Accepts:
+      - raw Google Forms dataframe (long question headers), OR
+      - dataframe already renamed by data_loader.py (short column names)
+
+    Returns:
+      - dataframe with Aelyana-specific engineered variables:
+        InsomniaSeverity_index, Insomnia_Category, + numeric academic impact features.
+    """
+    if df is None or len(df) == 0:
+        return df
+
+    out = df.copy()
+    out.columns = [_norm_col(c) for c in out.columns]
+
+    # Rename long Google Form questions -> short names (only if short names missing)
+    rename_candidates = {
+        "Timestamp": "Timestamp",
+        "How often do you have difficulty falling asleep at night?": "DifficultyFallingAsleep",
+        "How often do you wake up during the night and have trouble falling back asleep?": "NightWakeups",
+        "How would you rate the overall quality of your sleep?": "SleepQuality",
+        "How often do you feel fatigued during the day, affecting your ability to study or attend classes?": "DaytimeFatigue",
+        "On average, how many hours of sleep do you get on a typical day?": "SleepHours",
+        "How often do you experience difficulty concentrating during lectures or studying due to lack of sleep?": "ConcentrationDifficulty",
+        "How often do you miss or skip classes due to sleep-related issues (e.g., insomnia, feeling tired)?": "MissedClasses",
+        "How would you describe the impact of insufficient sleep on your ability to complete assignments and meet deadlines?": "AssignmentImpact",
+        "How would you rate your overall academic performance (GPA or grades) in the past semester?": "AcademicPerformance",
+        "What is your GPA range for the most recent semester?": "GPA",
+        "What is your CGPA range for the most recent semester?": "CGPA",
+    }
+
+    rename_dict = {}
+    for long_name, short_name in rename_candidates.items():
+        long_key = _norm_col(long_name)
+        if short_name not in out.columns and long_key in out.columns:
+            rename_dict[long_key] = short_name
+
+    if rename_dict:
+        out = out.rename(columns=rename_dict)
+
+    # Timestamp -> datetime
+    if "Timestamp" in out.columns:
+        out["Timestamp"] = pd.to_datetime(out["Timestamp"], errors="coerce")
+
+    # -----------------------------
+    # ISI-like index (0..16-ish in your original method)
+    # -----------------------------
+    # SleepQuality is numeric 1..5 (5=excellent). Convert to risk points.
+    if "SleepQuality" in out.columns:
+        sq_num = pd.to_numeric(out["SleepQuality"], errors="coerce")
+        out["SleepQuality_Score"] = (5 - sq_num).clip(lower=0, upper=4).fillna(0)
     else:
-        st.write("No duplicate rows found.")
+        out["SleepQuality_Score"] = 0
 
-# =========================================================
-# 3. RENAME COLUMNS
-# =========================================================
-if uploaded_file:
-    new_column_names = [
-        'Timestamp','Gender','AgeGroup','YearOfStudy','Faculty',
-        'DifficultyFallingAsleep','SleepHours','NightWakeups','SleepQuality',
-        'BedTime','DayNap','ConcentrationDifficulty','DaytimeFatigue',
-        'MissedClasses','AssignmentImpact','ExamSleepChange',
-        'AcademicPerformance','GPA','CGPA','DeviceUsage',
-        'CaffeineConsumption','PhysicalActivity','StressLevel','SleepMethods'
-    ]
-    
-    df.columns = new_column_names
-    st.subheader("Data with Renamed Columns")
-    st.dataframe(df.head())
+    out["FallingAsleep_Score"] = out["DifficultyFallingAsleep"].map(_map_freq).fillna(0) if "DifficultyFallingAsleep" in out.columns else 0
+    out["NightWakeups_Score"] = out["NightWakeups"].map(_map_freq).fillna(0) if "NightWakeups" in out.columns else 0
+    out["Fatigue_Score"] = out["DaytimeFatigue"].map(_map_freq).fillna(0) if "DaytimeFatigue" in out.columns else 0
 
-# =========================================================
-# 4. INSOMNIA SEVERITY INDEX (ISI)
-# =========================================================
-if uploaded_file:
-    freq_mapping = {
-        'Never': 0,
-        'Rarely (1–2 times a month)': 1,
-        'Rarely (1–2 times a week)': 1,
-        'Rarely': 1,
-        'Sometimes (3–4 times a week)': 2,
-        'Occasionally': 2,
-        'Sometimes': 2,
-        'Often (5–6 times a week)': 3,
-        'Frequently': 3,
-        'Often': 3,
-        'Always (every night)': 4,
-        'Always': 4
+    out["InsomniaSeverity_index"] = (
+        out["FallingAsleep_Score"]
+        + out["NightWakeups_Score"]
+        + out["SleepQuality_Score"]
+        + out["Fatigue_Score"]
+    ).astype(float)
+
+    out["Insomnia_Category"] = out["InsomniaSeverity_index"].apply(_categorize_insomnia)
+
+    # -----------------------------
+    # Feature engineering for analytics
+    # -----------------------------
+    if "SleepHours" in out.columns and "SleepHours_est" not in out.columns:
+        out["SleepHours_est"] = out["SleepHours"].apply(_sleep_hours_to_est)
+
+    academic_map = {"Poor": 0, "Fair": 1, "Average": 2, "Good": 3, "Very good": 4, "Excellent": 5}
+    if "AcademicPerformance" in out.columns:
+        out["AcademicPerformance_numeric"] = out["AcademicPerformance"].map(academic_map)
+
+    freq_simple = {"Never": 0, "Rarely": 1, "Sometimes": 2, "Often": 3, "Always": 4}
+    if "DaytimeFatigue" in out.columns:
+        out["DaytimeFatigue_numeric"] = out["DaytimeFatigue"].astype(str).map(freq_simple).fillna(0)
+
+    if "ConcentrationDifficulty" in out.columns:
+        out["ConcentrationDifficulty_numeric"] = out["ConcentrationDifficulty"].astype(str).map(freq_simple).fillna(0)
+
+    missed_map = {
+        "Never": 0,
+        "Rarely (1–2 times a month)": 1,
+        "Rarely (1-2 times a month)": 1,
+        "Sometimes (3–4 times a month)": 2,
+        "Sometimes (3-4 times a month)": 2,
+        "Often (5–6 times a month)": 3,
+        "Often (5-6 times a month)": 3,
+        "Always (every day)": 4,
     }
+    if "MissedClasses" in out.columns:
+        out["MissedClasses_numeric"] = out["MissedClasses"].astype(str).map(missed_map).fillna(0)
 
-    df['SleepQuality_Score'] = 5 - df['SleepQuality']
-    df['FallingAsleep_Score'] = df['DifficultyFallingAsleep'].map(freq_mapping).fillna(0)
-    df['NightWakeups_Score'] = df['NightWakeups'].map(freq_mapping).fillna(0)
-    df['Fatigue_Score'] = df['DaytimeFatigue'].map(freq_mapping).fillna(0)
-
-    df['InsomniaSeverity_index'] = (
-        df['FallingAsleep_Score'] +
-        df['NightWakeups_Score'] +
-        df['SleepQuality_Score'] +
-        df['Fatigue_Score']
-    )
-
-    def categorize_insomnia(score):
-        if score <= 4:
-            return 'Low / No Insomnia'
-        elif score <= 8:
-            return 'Moderate Insomnia'
-        else:
-            return 'Severe Insomnia'
-
-    df['Insomnia_Category'] = df['InsomniaSeverity_index'].apply(categorize_insomnia)
-
-    st.subheader("Insomnia Severity Index and Category")
-    st.dataframe(df[['InsomniaSeverity_index','Insomnia_Category']].head())
-
-# =========================================================
-# 5. FEATURE ENGINEERING
-# =========================================================
-if uploaded_file:
-    st.header("Feature Engineering")
-
-    # Sleep Hours
-    sleep_hours_mapping = {
-        'Less than 5 hours': 2.5,
-        '5–6 hours': 5.5,
-        '7–8 hours': 7.5,
-        'More than 8 hours': 9.0
+    gpa_map = {
+        "Below 2.00": 1.5,
+        "2.00 - 2.99": 2.5,
+        "3.00 - 3.69": 3.35,
+        "3.70 - 4.00": 3.85,
     }
-    df['SleepHours_est'] = df['SleepHours'].map(sleep_hours_mapping)
+    if "GPA" in out.columns:
+        out["GPA_numeric"] = out["GPA"].map(gpa_map)
+    if "CGPA" in out.columns:
+        out["CGPA_numeric"] = out["CGPA"].map(gpa_map)
 
-    # Academic Performance
-    academic_performance_mapping = {
-        'Poor':0,'Fair':1,'Average':2,'Good':3,'Very good':4,'Excellent':5
-    }
-    df['AcademicPerformance_numeric'] = df['AcademicPerformance'].map(academic_performance_mapping)
-
-    # Daytime Fatigue
-    daytime_fatigue_mapping = {'Never':0,'Rarely':1,'Sometimes':2,'Often':3,'Always':4}
-    df['DaytimeFatigue_numeric'] = df['DaytimeFatigue'].map(daytime_fatigue_mapping).fillna(0)
-
-    # Missed Classes
-    missed_classes_mapping = {
-        'Never':0,'Rarely (1–2 times a month)':1,
-        'Sometimes (3–4 times a month)':2,
-        'Often (5–6 times a month)':3,
-        'Always (every day)':4
-    }
-    df['MissedClasses_numeric'] = df['MissedClasses'].map(missed_classes_mapping).fillna(0)
-
-    # GPA & CGPA
-    gpa_mapping = {
-        'Below 2.00':1.5,
-        '2.00 - 2.99':2.5,
-        '3.00 - 3.69':3.35,
-        '3.70 - 4.00':3.85
-    }
-    df['GPA_numeric'] = df['GPA'].map(gpa_mapping).fillna(0)
-    df['CGPA_numeric'] = df['CGPA'].map(gpa_mapping).fillna(0)
-
-    # Concentration Difficulty
-    concentration_mapping = {'Never':0,'Rarely':1,'Sometimes':2,'Often':3,'Always':4}
-    df['ConcentrationDifficulty_numeric'] = df['ConcentrationDifficulty'].map(concentration_mapping).fillna(0)
-
-    st.success("Feature engineering completed!")
-
-# =========================================================
-# 6. SAVE FINAL DATASET
-# =========================================================
-if uploaded_file:
-    st.header("Download Processed Dataset")
-    csv = df.to_csv(index=False).encode('utf-8')
-    st.download_button(
-        label="Download CSV",
-        data=csv,
-        file_name='final_processed_data.csv',
-        mime='text/csv',
-    )
-
+    return out
