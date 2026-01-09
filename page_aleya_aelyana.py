@@ -80,24 +80,28 @@ def render():
         "🧠 Concentration Difficulty",
         f"{focus_risk:.1f}%",
         help="Students with severe insomnia who often/always struggle to concentrate"
+        border=True
     )
 
     col2.metric(
         "😫 Daytime Fatigue",
         f"{fatigue_impact:.1f}%",
         help="Students with severe insomnia who frequently feel fatigued"
+        border=True
     )
 
     col3.metric(
         "📉 Academic Performance",
         perf_impact,
         help="Most common academic performance level for severe insomnia group"
+        border=True
     )
 
     col4.metric(
         "📝 Assignment Impact",
         f"{assign_impact:.1f}%",
         help="Students reporting major or severe assignment difficulties"
+        border=True
     )
 
     st.divider()
