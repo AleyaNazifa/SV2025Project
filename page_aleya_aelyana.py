@@ -305,6 +305,20 @@ def render():
         #fig.update_xaxes(tickangle=45)
 
         st.plotly_chart(fig, use_container_width=True)
+        st.markdown("""
+        **Key Insights**
+        * Estimated sleep hours show a moderate positive correlation with Academic Performance (0.36), but have almost no relationship with actual GPA (0.05) or CGPA (0.01).
+        * There is a strong internal correlation between Daytime Fatigue and Concentration Difficulty (0.63). Also, Insomnia Severity is a significant predictor of Fatigue (0.54) and Concentration Difficulty (0.38).
+        * Insomnia Severity shows a notable negative correlation with GPA (-0.25) and CGPA (-0.17).
+        * There is a strong correlation between GPA and CGPA (0.65). Interestingly, Academic Performance correlates more strongly with GPA (0.40) than it does with any sleep-related metrics.
+        *Missed Classes show very weak or slightly negative correlations with sleep issues, like -0.03 with Insomnia.
+
+        **Conclusion**
+        * The data shows that sleep quality (insomnia) is a much bigger threat to actual grades than just the number of hours slept. 
+        While more sleep may make students feel like they are performing better, the real issues are fatigue and concentration 
+        problems caused by insomnia, which lead to lower grades. To truly improve results, the focus should be on improving 
+        sleep quality and treating insomnia rather than just trying to spend more hours in bed.
+        """)
 
     else:
         st.warning("Not enough numeric variables available to generate correlation heatmap.")
