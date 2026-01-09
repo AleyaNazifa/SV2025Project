@@ -236,7 +236,7 @@ def render():
         fig = px.imshow(
             corr_matrix,
             text_auto=".2f",
-            color_continuous_scale="Sunset",
+            color_continuous_scale='Sunset',
             zmin=-1,
             zmax=1,
             title="Correlation Heatmap: Sleep Issues vs. Academic Outcomes"
