@@ -219,7 +219,7 @@ def render():
     # Chart 6: Correlation Heatmap
     # -----------------------------
     st.divider()
-    st.subheader("Correlation Analysis: Sleep Issues vs Academic Outcomes")
+    st.subheader("Correlation Heatmap: Sleep Issues vs. Academic Outcomes")
 
     corr_columns = [
         'SleepHours_est',
