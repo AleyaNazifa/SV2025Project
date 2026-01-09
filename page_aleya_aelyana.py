@@ -198,14 +198,14 @@ def render():
     # -----------------------------
     # Chart 5
     # -----------------------------
-    st.subheader("Academic Performance by Insomnia Severity")
+    st.subheader("Academic Performance by Insomnia Category")
     if {"Insomnia_Category", "AcademicPerformance"}.issubset(df.columns):
         fig = px.box(
             df,
             x="Insomnia_Category",
             y="AcademicPerformance",
             color="Insomnia_Category",
-            title="Academic Performance by Insomnia Severity",
+            title="Academic Performance by Insomnia Category",
             category_orders={"Insomnia_Category": insomnia_order, "AcademicPerformance": academic_order},
             color_discrete_sequence=px.colors.sequential.Sunset,
             points="outliers",
