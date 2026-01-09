@@ -243,12 +243,12 @@ def render():
             title="Correlation Heatmap: Sleep Issues vs. Academic Outcomes"
         )
 
-        #fig.update_layout(
-            #height=600,
-            #plot_bgcolor="rgba(0,0,0,0)",
-            #paper_bgcolor="rgba(0,0,0,0)",
-            #title_font_size=18
-        #)
+        fig.update_layout(
+            height=600,
+            plot_bgcolor="rgba(0,0,0,0)",
+            paper_bgcolor="rgba(0,0,0,0)",
+            title_font_size=18
+        )
 
         #fig.update_xaxes(tickangle=45)
 
