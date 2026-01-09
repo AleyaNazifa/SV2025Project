@@ -4,6 +4,18 @@ import plotly.express as px
 import numpy as np
 
 
+# 1. LOAD DATA FIRST
+@st.cache_data
+def load_data():
+    url = 'https://raw.githubusercontent.com/aleya566/project/refs/heads/main/final_processed_data%20(8).csv'
+    df = pd.read_csv(url)
+    
+    # (optional: set categorical orders)
+    return df
+
+df = load_data()  # Make sure this runs BEFORE you use df
+
+
 # ===============================
 # SIDEBAR INFO CARDS
 # ===============================
