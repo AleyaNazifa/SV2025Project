@@ -96,6 +96,7 @@ def render():
     # -----------------------------
     # Chart 1
     # -----------------------------
+    st.subheader("Concentration Difficulty by Insomnia Category")
     if {"Insomnia_Category", "ConcentrationDifficulty"}.issubset(df.columns):
         tab = pd.crosstab(df["Insomnia_Category"], df["ConcentrationDifficulty"], dropna=False)
         melted = tab.reset_index().melt(
@@ -122,6 +123,7 @@ def render():
     # -----------------------------
     # Chart 2
     # -----------------------------
+    st.subheader("Insomnia Severity Index Across GPA Categories")
     if {"GPA", "InsomniaSeverity_index"}.issubset(df.columns):
         gpa_order = sorted(df["GPA"].dropna().unique().tolist())
         fig = px.box(
@@ -143,6 +145,7 @@ def render():
     # -----------------------------
     # Chart 3
     # -----------------------------
+    st.subheader("Assignment Impact by Insomnia Category")
     if {"Insomnia_Category", "AssignmentImpact"}.issubset(df.columns):
         tab = pd.crosstab(df["Insomnia_Category"], df["AssignmentImpact"], dropna=False)
         melted = tab.reset_index().melt(
@@ -169,6 +172,7 @@ def render():
     # -----------------------------
     # Chart 4
     # -----------------------------
+    st.subheader("Fatigue Level by Insomnia Severity")
     if {"Insomnia_Category", "DaytimeFatigue"}.issubset(df.columns):
         tab = pd.crosstab(df["Insomnia_Category"], df["DaytimeFatigue"], dropna=False)
         melted = tab.reset_index().melt(
@@ -194,6 +198,7 @@ def render():
     # -----------------------------
     # Chart 5
     # -----------------------------
+    st.subheader("Academic Performance by Insomnia Severity")
     if {"Insomnia_Category", "AcademicPerformance"}.issubset(df.columns):
         fig = px.box(
             df,
