@@ -3,49 +3,6 @@ import pandas as pd
 import plotly.express as px
 import numpy as np
 
-
-# 1. LOAD DATA FIRST
-@st.cache_data
-def load_data():
-    url = 'https://raw.githubusercontent.com/aleya566/project/refs/heads/main/final_processed_data%20(8).csv'
-    df = pd.read_csv(url)
-    
-    # (optional: set categorical orders)
-    return df
-
-df = load_data()  # Make sure this runs BEFORE you use df
-
-
-# ===============================
-# SIDEBAR INFO CARDS
-# ===============================
-import datetime
-
-st.sidebar.title("📊 Data Status")
-
-# 1️⃣ Total Responses
-total_responses = len(df)
-st.sidebar.metric("Total Responses", f"{total_responses}")
-
-# 2️⃣ Last Updated
-# If you want a static timestamp for now:
-last_updated = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-st.sidebar.metric("Last Updated", last_updated)
-
-# 3️⃣ Faculties (unique faculties count)
-if "Faculty" in df.columns:
-    faculties = df["Faculty"].nunique()
-    st.sidebar.metric("Faculties", faculties)
-
-# 4️⃣ Avg ISI (Insomnia Severity Index)
-if "InsomniaSeverity_index" in df.columns:
-    avg_isi = df["InsomniaSeverity_index"].mean()
-    st.sidebar.metric("Avg ISI", f"{avg_isi:.2f}")
-
-# 5️⃣ Auto-refresh info
-st.sidebar.info("🔄 Auto-refresh every 5 minutes")
-
-
 # ==========================================
 # 1. PAGE CONFIGURATION
 # ==========================================
