@@ -7,153 +7,194 @@ from data_loader import display_sidebar_info, get_df
 
 pio.templates.default = "plotly_white"
 
-TEXT = "#1F2937"
-GRID = "rgba(148,163,184,0.25)"
 
-GOOD = "#22C55E"     # green
-WARN = "#F59E0B"     # amber
-RISK = "#EF4444"     # red
-NEUTRAL = "#64748B"  # slate
-
-
+# ==========================================
+# Helper
+# ==========================================
 def pct(n, total):
-    return (n / total * 100) if total else 0
+    return (n / total * 100) if total else 0.0
 
 
-def style(fig, title, xlab=None, ylab=None):
-    fig.update_layout(
-        title=title,
-        font=dict(color=TEXT),
-        title_font=dict(size=22, color=TEXT),
-        margin=dict(l=10, r=10, t=55, b=10),
-        xaxis=dict(showgrid=True, gridcolor=GRID, zeroline=False),
-        yaxis=dict(showgrid=True, gridcolor=GRID, zeroline=False),
-        legend=dict(title="", orientation="h", yanchor="bottom", y=1.02, xanchor="left", x=0),
-    )
-    if xlab:
-        fig.update_xaxes(title_text=xlab)
-    if ylab:
-        fig.update_yaxes(title_text=ylab)
-    return fig
-
-
+# ==========================================
+# Main Page
+# ==========================================
 def render():
     display_sidebar_info()
+
     df = get_df()
-    if df is None or len(df) == 0:
+    if df is None or df.empty:
         st.error("No data available.")
         return
 
     total = len(df)
 
-    st.title("🏃 Lifestyle Factors Analysis (Nash)")
-    st.markdown("### Technology, Caffeine, Exercise, and Stress")
-    st.markdown("---")
-
-    # =========================
-    # C1 Bar — Device usage
-    # =========================
-    device_counts = df["DeviceUsage"].value_counts().reset_index()
-    device_counts.columns = ["DeviceUsage", "Count"]
-
-    fig = px.bar(
-        device_counts,
-        x="DeviceUsage",
-        y="Count",
-        color_discrete_sequence=[NEUTRAL],
-    )
-    fig = style(fig, "Device Usage Before Sleep", "Frequency", "Number of Students")
-    st.plotly_chart(fig, use_container_width=True)
-    st.caption("Figure C1. Bar chart of device usage frequency before bedtime.")
-
-    heavy = df["DeviceUsage"].astype(str).str.contains("Always|Often", na=False).sum()
+    st.title("Lifestyle & Stress Factors Associated with Insomnia Severity")
     st.markdown(
-        f"**Interpretation (C1).** **{heavy} students ({pct(heavy,total):.1f}%)** report frequent device use before sleep. "
-        "High screen exposure may delay sleep onset via blue light and mental stimulation, contributing to poorer sleep hygiene."
+        """
+This dashboard investigates how **electronic device usage**, **caffeine consumption**, 
+**physical activity**, and **academic stress** are associated with **insomnia severity** 
+among university students.
+        """
     )
+    st.divider()
 
-    # =========================
-    # C2 Radar — Lifestyle risk profile
-    # =========================
-    risk = {
-        "Device Use": (df["DeviceUsage"].astype(str).str.contains("Always|Often", na=False)).mean(),
-        "Caffeine": (df["CaffeineConsumption"].astype(str).str.contains("Always|Often", na=False)).mean(),
-        "Stress": (df["StressLevel"].astype(str).str.contains("High|Extremely", na=False)).mean(),
-        "Inactivity": (df["PhysicalActivity"].astype(str).str.contains("Never|Rarely", na=False)).mean(),
-    }
-    radar_df = pd.DataFrame({"Factor": list(risk.keys()), "Score": list(risk.values())})
+    # ==========================================
+    # Key Risk Metrics
+    # ==========================================
+    st.subheader("Key Lifestyle Risk Indicators")
 
-    fig = px.line_polar(
-        radar_df,
-        r="Score",
-        theta="Factor",
-        line_close=True,
-        color_discrete_sequence=[WARN],
-    )
-    fig = style(fig, "Average Lifestyle Risk Profile")
-    st.plotly_chart(fig, use_container_width=True)
-    st.caption("Figure C2. Radar chart summarizing prevalence of key lifestyle risks.")
+    col1, col2, col3, col4 = st.columns(4)
 
-    st.markdown(
-        "**Interpretation (C2).** Higher values indicate a greater proportion of students exposed to that lifestyle risk. "
-        "Stress and device use often dominate in student populations, suggesting interventions targeting these factors may yield meaningful sleep improvements."
-    )
+    high_device = df["DeviceUsage"].astype(str).str.contains("Always|Often", na=False).sum()
+    high_caffeine = df["CaffeineConsumption"].astype(str).str.contains("Always|Often", na=False).sum()
+    low_activity = df["PhysicalActivity"].astype(str).str.contains("Never|Rarely", na=False).sum()
+    high_stress = df["StressLevel"].astype(str).str.contains("High|Extremely", na=False).sum()
 
-    # =========================
-    # C3 Sunburst — Stress → Caffeine → Device
-    # =========================
-    fig = px.sunburst(
+    col1.metric("📱 Frequent Device Use", f"{pct(high_device, total):.1f}%")
+    col2.metric("☕ High Caffeine Intake", f"{pct(high_caffeine, total):.1f}%")
+    col3.metric("🏃 Low Physical Activity", f"{pct(low_activity, total):.1f}%")
+    col4.metric("🎓 High Academic Stress", f"{pct(high_stress, total):.1f}%")
+
+    st.divider()
+
+    # ==========================================
+    # Figure C1 — Device Usage vs Insomnia Severity
+    # ==========================================
+    st.subheader("Figure C1 — Insomnia Severity by Device Usage")
+
+    fig1 = px.box(
         df,
-        path=["StressLevel", "CaffeineConsumption", "DeviceUsage"],
-        color="StressLevel",
-        color_discrete_sequence=[GOOD, WARN, RISK, NEUTRAL],
+        x="DeviceUsage",
+        y="InsomniaSeverity_index",
+        title="Insomnia Severity Across Device Usage Levels",
     )
-    fig = style(fig, "Stress → Caffeine → Device Usage (Behaviour Hierarchy)")
-    st.plotly_chart(fig, use_container_width=True)
-    st.caption("Figure C3. Sunburst chart showing co-occurrence of stress, caffeine use, and device usage.")
+    fig1.update_layout(
+        xaxis_title="Device Usage Before Sleep",
+        yaxis_title="Insomnia Severity Index (ISI)"
+    )
+    st.plotly_chart(fig1, use_container_width=True)
 
     st.markdown(
-        "**Interpretation (C3).** The hierarchy highlights how higher stress may co-occur with increased caffeine use and device usage. "
-        "These behaviours can reinforce each other and amplify sleep disruption, supporting multi-pronged sleep hygiene strategies."
+        """
+**Interpretation:**  
+Students reporting more frequent device usage before sleep tend to show **higher insomnia severity scores**. 
+This supports existing evidence that screen exposure and cognitive stimulation delay sleep onset.
+        """
     )
 
-    # =========================
-    # C4 Bubble — Lifestyle_Risk vs ISI
-    # =========================
-    fig = px.scatter(
+    st.divider()
+
+    # ==========================================
+    # Figure C2 — Caffeine Consumption vs ISI
+    # ==========================================
+    st.subheader("Figure C2 — Insomnia Severity by Caffeine Consumption")
+
+    fig2 = px.box(
+        df,
+        x="CaffeineConsumption",
+        y="InsomniaSeverity_index",
+        title="Insomnia Severity Across Caffeine Consumption Levels",
+    )
+    fig2.update_layout(
+        xaxis_title="Caffeine Consumption",
+        yaxis_title="Insomnia Severity Index (ISI)"
+    )
+    st.plotly_chart(fig2, use_container_width=True)
+
+    st.markdown(
+        """
+**Interpretation:**  
+Higher caffeine consumption is associated with **greater insomnia severity**, likely due to 
+caffeine’s stimulant effects on sleep latency and sleep depth.
+        """
+    )
+
+    st.divider()
+
+    # ==========================================
+    # Figure C3 — Physical Activity vs ISI
+    # ==========================================
+    st.subheader("Figure C3 — Insomnia Severity by Physical Activity Level")
+
+    fig3 = px.box(
+        df,
+        x="PhysicalActivity",
+        y="InsomniaSeverity_index",
+        title="Insomnia Severity Across Physical Activity Levels",
+    )
+    fig3.update_layout(
+        xaxis_title="Physical Activity Frequency",
+        yaxis_title="Insomnia Severity Index (ISI)"
+    )
+    st.plotly_chart(fig3, use_container_width=True)
+
+    st.markdown(
+        """
+**Interpretation:**  
+Students engaging in **regular physical activity** generally report **lower insomnia severity**, 
+supporting exercise as a protective factor for sleep quality.
+        """
+    )
+
+    st.divider()
+
+    # ==========================================
+    # Figure C4 — Stress Level vs Insomnia Severity
+    # ==========================================
+    st.subheader("Figure C4 — Insomnia Severity by Academic Stress Level")
+
+    fig4 = px.box(
+        df,
+        x="StressLevel",
+        y="InsomniaSeverity_index",
+        title="Insomnia Severity Across Academic Stress Levels",
+    )
+    fig4.update_layout(
+        xaxis_title="Academic Stress Level",
+        yaxis_title="Insomnia Severity Index (ISI)"
+    )
+    st.plotly_chart(fig4, use_container_width=True)
+
+    st.markdown(
+        """
+**Interpretation:**  
+A clear gradient is observed where **higher academic stress** corresponds to **higher insomnia severity**, 
+highlighting stress as a dominant driver of sleep disruption.
+        """
+    )
+
+    st.divider()
+
+    # ==========================================
+    # Figure C5 — Combined Lifestyle Risk vs ISI
+    # ==========================================
+    st.subheader("Figure C5 — Combined Lifestyle Risk Score vs Insomnia Severity")
+
+    fig5 = px.scatter(
         df,
         x="Lifestyle_Risk",
         y="InsomniaSeverity_index",
-        size="Lifestyle_Risk",
-        color="StressLevel",
-        opacity=0.85,
-        color_discrete_sequence=[GOOD, WARN, RISK, NEUTRAL],
+        trendline="ols",
+        title="Accumulated Lifestyle Risk vs Insomnia Severity",
+        opacity=0.75,
     )
-    fig = style(fig, "Lifestyle Risk Score vs Insomnia Severity", "Lifestyle Risk (0–11)", "ISI Score (0–28)")
-    st.plotly_chart(fig, use_container_width=True)
-    st.caption("Figure C4. Bubble plot of lifestyle risk score versus insomnia severity (colored by stress).")
+    fig5.update_layout(
+        xaxis_title="Lifestyle Risk Score",
+        yaxis_title="Insomnia Severity Index (ISI)"
+    )
+    st.plotly_chart(fig5, use_container_width=True)
 
     st.markdown(
-        "**Interpretation (C4).** Students with higher lifestyle risk scores generally show higher insomnia severity, "
-        "suggesting that behavioural risks accumulate. Stress coloring reinforces the role of psychological load as a key driver of sleep disruption."
+        """
+**Interpretation:**  
+A positive association is observed between **accumulated lifestyle risk** and **insomnia severity**.  
+This indicates that sleep problems often emerge from **multiple interacting behaviours**, rather than a single factor.
+        """
     )
 
-    # =========================
-    # C5 Heatmap — Device × Caffeine
-    # =========================
-    heat = pd.crosstab(df["DeviceUsage"], df["CaffeineConsumption"])
-    fig = px.imshow(
-        heat,
-        text_auto=True,
-        color_continuous_scale=["#ECFDF5", WARN, RISK],
-    )
-    fig = style(fig, "Device Usage vs Caffeine Consumption")
-    st.plotly_chart(fig, use_container_width=True)
-    st.caption("Figure C5. Heatmap of device usage frequency against caffeine consumption frequency.")
-
-    st.markdown(
-        "**Interpretation (C5).** Concentration of counts in higher device and higher caffeine categories indicates behavioural coupling. "
-        "This pairing may jointly worsen sleep outcomes by delaying bedtime and reducing sleep depth, strengthening the case for targeted behaviour change."
+    st.success(
+        "Overall conclusion: Lifestyle behaviours and academic stress show consistent associations "
+        "with insomnia severity, supporting integrated sleep health interventions for students."
     )
 
 
