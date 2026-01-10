@@ -76,9 +76,17 @@ and **academic stress** are associated with **insomnia severity** among universi
     )
     st.plotly_chart(fig1, use_container_width=True)
 
-    st.markdown(
-        "**Interpretation:** A substantial proportion of students report frequent device use before bedtime, "
-        "which may interfere with sleep onset through screen exposure and mental stimulation."
+  st.markdown(
+        """
+**Key Insights**
+- The bar chart shows that device usage before sleep is **not evenly distributed**.
+- A visibly larger group of students reports using devices **often or always** compared to those who rarely or never use devices.
+- This indicates that pre-bed screen exposure is a **common behaviour**, not a marginal one.
+
+**Conclusion**
+- Since frequent device use is widespread, it represents a **population-level risk factor**.
+- Any association found later between device use and insomnia severity affects a **substantial portion of students**, increasing its practical importance.
+        """
     )
 
     st.divider()
