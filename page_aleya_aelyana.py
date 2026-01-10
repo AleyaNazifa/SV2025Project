@@ -39,7 +39,6 @@ def render():
         df["AssignmentImpact"] = pd.Categorical(df["AssignmentImpact"], categories=impact_order, ordered=True)
 
     st.title("Interpretation Dashboard: Impact of Sleep Related Issues on Academic Performance")
-    st.markdown("### How sleep-related issues relate to focus, fatigue, assignments, and performance")
     st.divider()
 
     # -----------------------------
