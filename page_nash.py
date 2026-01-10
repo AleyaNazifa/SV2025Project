@@ -28,18 +28,17 @@ def render():
 
     total = len(df)
 
-    st.title("Lifestyle & Stress Factors Associated with Insomnia Severity")
+    st.title("Lifestyle & Stress Factors and Insomnia Severity")
     st.markdown(
         """
-This dashboard investigates how **electronic device usage**, **caffeine consumption**, 
-**physical activity**, and **academic stress** are associated with **insomnia severity** 
-among university students.
+This dashboard examines how **lifestyle behaviours** (device usage, caffeine intake, physical activity)
+and **academic stress** are associated with **insomnia severity** among university students.
         """
     )
     st.divider()
 
     # ==========================================
-    # Key Risk Metrics
+    # Key Metrics
     # ==========================================
     st.subheader("Key Lifestyle Risk Indicators")
 
@@ -58,95 +57,90 @@ among university students.
     st.divider()
 
     # ==========================================
-    # Figure C1 — Device Usage vs Insomnia Severity
+    # Figure C1 — Device Usage Distribution
     # ==========================================
-    st.subheader("Figure C1 — Insomnia Severity by Device Usage")
+    st.subheader("Figure C1 — Device Usage Before Sleep")
 
-    fig1 = px.box(
+    device_counts = df["DeviceUsage"].value_counts().reset_index()
+    device_counts.columns = ["DeviceUsage", "Count"]
+
+    fig1 = px.bar(
+        device_counts,
+        x="DeviceUsage",
+        y="Count",
+        title="Distribution of Device Usage Before Sleep",
+    )
+    fig1.update_layout(
+        xaxis_title="Device Usage Frequency",
+        yaxis_title="Number of Students"
+    )
+    st.plotly_chart(fig1, use_container_width=True)
+
+    st.markdown(
+        "**Interpretation:** A substantial proportion of students report frequent device use before bedtime, "
+        "which may interfere with sleep onset through screen exposure and mental stimulation."
+    )
+
+    st.divider()
+
+    # ==========================================
+    # Figure C2 — Device Usage vs Insomnia Severity
+    # ==========================================
+    st.subheader("Figure C2 — Insomnia Severity by Device Usage")
+
+    fig2 = px.box(
         df,
         x="DeviceUsage",
         y="InsomniaSeverity_index",
         title="Insomnia Severity Across Device Usage Levels",
     )
-    fig1.update_layout(
-        xaxis_title="Device Usage Before Sleep",
-        yaxis_title="Insomnia Severity Index (ISI)"
-    )
-    st.plotly_chart(fig1, use_container_width=True)
-
-    st.markdown(
-        """
-**Interpretation:**  
-Students reporting more frequent device usage before sleep tend to show **higher insomnia severity scores**. 
-This supports existing evidence that screen exposure and cognitive stimulation delay sleep onset.
-        """
-    )
-
-    st.divider()
-
-    # ==========================================
-    # Figure C2 — Caffeine Consumption vs ISI
-    # ==========================================
-    st.subheader("Figure C2 — Insomnia Severity by Caffeine Consumption")
-
-    fig2 = px.box(
-        df,
-        x="CaffeineConsumption",
-        y="InsomniaSeverity_index",
-        title="Insomnia Severity Across Caffeine Consumption Levels",
-    )
     fig2.update_layout(
-        xaxis_title="Caffeine Consumption",
+        xaxis_title="Device Usage Before Sleep",
         yaxis_title="Insomnia Severity Index (ISI)"
     )
     st.plotly_chart(fig2, use_container_width=True)
 
     st.markdown(
-        """
-**Interpretation:**  
-Higher caffeine consumption is associated with **greater insomnia severity**, likely due to 
-caffeine’s stimulant effects on sleep latency and sleep depth.
-        """
+        "**Interpretation:** Higher frequency of device usage is associated with higher insomnia severity scores, "
+        "suggesting a negative impact of screen exposure on sleep health."
     )
 
     st.divider()
 
     # ==========================================
-    # Figure C3 — Physical Activity vs ISI
+    # Figure C3 — Caffeine Consumption vs ISI
     # ==========================================
-    st.subheader("Figure C3 — Insomnia Severity by Physical Activity Level")
+    st.subheader("Figure C3 — Insomnia Severity by Caffeine Consumption")
 
     fig3 = px.box(
         df,
-        x="PhysicalActivity",
+        x="CaffeineConsumption",
         y="InsomniaSeverity_index",
-        title="Insomnia Severity Across Physical Activity Levels",
+        title="Insomnia Severity Across Caffeine Consumption Levels",
     )
     fig3.update_layout(
-        xaxis_title="Physical Activity Frequency",
+        xaxis_title="Caffeine Consumption Frequency",
         yaxis_title="Insomnia Severity Index (ISI)"
     )
     st.plotly_chart(fig3, use_container_width=True)
 
     st.markdown(
-        """
-**Interpretation:**  
-Students engaging in **regular physical activity** generally report **lower insomnia severity**, 
-supporting exercise as a protective factor for sleep quality.
-        """
+        "**Interpretation:** Students with higher caffeine intake tend to report increased insomnia severity, "
+        "consistent with caffeine’s stimulant effects on sleep."
     )
 
     st.divider()
 
     # ==========================================
-    # Figure C4 — Stress Level vs Insomnia Severity
+    # Figure C4 — Stress Level vs Insomnia Severity (Violin)
     # ==========================================
     st.subheader("Figure C4 — Insomnia Severity by Academic Stress Level")
 
-    fig4 = px.box(
+    fig4 = px.violin(
         df,
         x="StressLevel",
         y="InsomniaSeverity_index",
+        box=True,
         title="Insomnia Severity Across Academic Stress Levels",
     )
     fig4.update_layout(
@@ -156,27 +150,23 @@ supporting exercise as a protective factor for sleep quality.
     st.plotly_chart(fig4, use_container_width=True)
 
     st.markdown(
-        """
-**Interpretation:**  
-A clear gradient is observed where **higher academic stress** corresponds to **higher insomnia severity**, 
-highlighting stress as a dominant driver of sleep disruption.
-        """
+        "**Interpretation:** Insomnia severity increases with higher academic stress levels, "
+        "highlighting stress as a key contributor to sleep disturbance."
     )
 
     st.divider()
 
     # ==========================================
-    # Figure C5 — Combined Lifestyle Risk vs ISI
+    # Figure C5 — Lifestyle Risk Score vs ISI
     # ==========================================
-    st.subheader("Figure C5 — Combined Lifestyle Risk Score vs Insomnia Severity")
+    st.subheader("Figure C5 — Combined Lifestyle Risk vs Insomnia Severity")
 
     fig5 = px.scatter(
         df,
         x="Lifestyle_Risk",
         y="InsomniaSeverity_index",
-        trendline="ols",
-        title="Accumulated Lifestyle Risk vs Insomnia Severity",
         opacity=0.75,
+        title="Lifestyle Risk Score vs Insomnia Severity",
     )
     fig5.update_layout(
         xaxis_title="Lifestyle Risk Score",
@@ -185,16 +175,13 @@ highlighting stress as a dominant driver of sleep disruption.
     st.plotly_chart(fig5, use_container_width=True)
 
     st.markdown(
-        """
-**Interpretation:**  
-A positive association is observed between **accumulated lifestyle risk** and **insomnia severity**.  
-This indicates that sleep problems often emerge from **multiple interacting behaviours**, rather than a single factor.
-        """
+        "**Interpretation:** A positive relationship is observed where higher accumulated lifestyle risk "
+        "corresponds to higher insomnia severity, indicating that sleep problems often result from multiple combined behaviours."
     )
 
     st.success(
-        "Overall conclusion: Lifestyle behaviours and academic stress show consistent associations "
-        "with insomnia severity, supporting integrated sleep health interventions for students."
+        "Conclusion: Lifestyle behaviours and academic stress show consistent associations with insomnia severity, "
+        "supporting integrated sleep health interventions for university students."
     )
 
 
